@@ -1,11 +1,12 @@
+from typing import Any
+
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from src.meals.models import MealModel, MealCategoryModel
 from src.meals.schemas import (
-    MealCreate, MealUpdate, MealCategoryCreate, MealCategoryUpdate,
-    MealPutUpdate
+    MealCreate, MealCategoryCreate, MealCategoryUpdate
 )
 
 
@@ -29,8 +30,8 @@ class MealCategoryRepository:
 
     async def get_by_id(self, category_id: int):
         result = await self.db.execute(
-            select(MealCategoryModel).where(
-                MealCategoryModel.id == category_id)
+            select(MealCategoryModel)
+            .where(MealCategoryModel.id == category_id)
         )
         return result.scalar_one_or_none()
 
@@ -84,13 +85,14 @@ class MealRepository:
     async def update(
             self,
             meal_id: int,
-            meal_data: MealPutUpdate | MealUpdate
+            meal_data: dict[str, Any]
     ) -> MealModel | None:
         if 'image_url' in meal_data and meal_data['image_url'] is not None:
             meal_data['image_url'] = str(meal_data['image_url'])
 
         await self.db.execute(
-            update(MealModel).where(MealModel.id == meal_id).values(**meal_data)
+            update(MealModel)
+            .where(MealModel.id == meal_id).values(**meal_data)
         )
         await self.db.commit()
 
