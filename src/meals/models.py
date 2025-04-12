@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import ForeignKey, Text, text
+from sqlalchemy import ForeignKey, Text
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from src.database import Base
@@ -12,9 +12,7 @@ class MealCategoryModel(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(unique=True)
-    created_at: Mapped[datetime] = mapped_column(
-        server_default=text('TIMEZONE("utc", now())')
-    )
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     meals = relationship("MealModel", back_populates='category')
 
@@ -35,9 +33,7 @@ class MealModel(Base):
     description: Mapped[str] = mapped_column(Text)
     quantity: Mapped[int] = mapped_column(default=1)
     price: Mapped[Decimal]
-    created_at: Mapped[datetime] = mapped_column(
-        server_default=text('TIMEZONE("utc", now())')
-    )
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     category = relationship("MealCategoryModel", back_populates='meals')
 
