@@ -1,8 +1,8 @@
-"""created meal_categories, meals tables
+"""create tables meal_categories and meals
 
-Revision ID: d281ef1e3194
+Revision ID: efb2f9045e6d
 Revises: 
-Create Date: 2025-04-04 10:16:15.684846
+Create Date: 2025-04-12 22:43:02.381119
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'd281ef1e3194'
+revision: str = 'efb2f9045e6d'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -35,6 +35,7 @@ def upgrade() -> None:
     sa.Column('category_id', sa.Integer(), nullable=False),
     sa.Column('description', sa.Text(), nullable=False),
     sa.Column('quantity', sa.Integer(), nullable=False),
+    sa.Column('price', sa.Numeric(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['category_id'], ['meal_categories.id'], ),
     sa.PrimaryKeyConstraint('id'),
