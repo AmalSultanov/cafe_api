@@ -14,7 +14,9 @@ class MealCategoryModel(Base):
     name: Mapped[str] = mapped_column(unique=True)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
-    meals = relationship("MealModel", back_populates='category')
+    meals: Mapped['MealModel'] = relationship(
+        "MealModel", back_populates='category'
+    )
 
     repr_cols_num = 2
     repr_cols = ('created_at',)
@@ -35,7 +37,9 @@ class MealModel(Base):
     price: Mapped[Decimal]
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
-    category = relationship("MealCategoryModel", back_populates='meals')
+    category: Mapped['MealCategoryModel'] = relationship(
+        "MealCategoryModel", back_populates='meals'
+    )
 
     repr_cols_num = 3
     repr_cols = ('created_at',)
