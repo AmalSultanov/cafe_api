@@ -29,6 +29,11 @@ class MealBase(BaseModel):
     quantity: int
     price: Decimal
 
+    class Config:
+        json_encoders = {
+            Decimal: lambda v: format(v, 'f')
+        }
+
 
 class MealCreate(MealBase):
     pass
