@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_session
@@ -32,11 +32,7 @@ async def get_category(
         db: AsyncSession = Depends(get_session)
 ):
     service = MealCategoryService(db)
-    category = await service.get_category(category_id)
-
-    if not category:
-        raise HTTPException(status_code=404, detail='Category not found')
-    return category
+    return await service.get_category(category_id)
 
 
 @meals_router.patch(
@@ -49,11 +45,7 @@ async def update_category(
         db: AsyncSession = Depends(get_session)
 ):
     service = MealCategoryService(db)
-    result = await service.update_category(category_id, category_data)
-
-    if not result:
-        raise HTTPException(status_code=404, detail='Category not found')
-    return result
+    return await service.update_category(category_id, category_data)
 
 
 @meals_router.delete(
@@ -65,11 +57,7 @@ async def delete_category(
         db: AsyncSession = Depends(get_session)
 ):
     service = MealCategoryService(db)
-    category = await service.delete_category(category_id)
-
-    if not category:
-        raise HTTPException(status_code=404, detail='Category not found')
-    return category
+    return await service.delete_category(category_id)
 
 
 @meals_router.post('/categories/{category_id}/meals', response_model=MealRead)
@@ -141,5 +129,4 @@ async def delete_meal(
         db: AsyncSession = Depends(get_session)
 ):
     service = MealService(db)
-    meal = await service.delete_meal(category_id, meal_id)
-    return meal
+    return await service.delete_meal(category_id, meal_id)
