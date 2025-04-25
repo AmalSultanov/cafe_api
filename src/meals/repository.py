@@ -5,9 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from src.meals.models import MealModel, MealCategoryModel
-from src.meals.schemas import (
-    MealCreate, MealCategoryCreate, MealCategoryUpdate
-)
 
 
 class MealCategoryRepository:
@@ -16,12 +13,14 @@ class MealCategoryRepository:
 
     async def create(
             self,
-            category_data: MealCategoryCreate
+            category_data: dict[str, Any]
     ) -> MealCategoryModel:
-        category = MealCategoryModel(name=category_data.name)
+        category = MealCategoryModel(**category_data)
         self.db.add(category)
+
         await self.db.commit()
         await self.db.refresh(category)
+
         return category
 
     async def get_all(self):
@@ -33,22 +32,21 @@ class MealCategoryRepository:
             select(MealCategoryModel)
             .where(MealCategoryModel.id == category_id)
         )
+
         return result.scalar_one_or_none()
 
     async def update(
             self,
             category_id: int,
-            category_data: MealCategoryUpdate
+            category_data: dict[str, Any]
     ) -> MealCategoryModel | None:
-        category = await self.get_by_id(category_id)
-
-        for key, value in category_data.items():
-            if hasattr(category, key) and value is not None:
-                setattr(category, key, value)
-
+        await self.db.execute(
+            update(MealCategoryModel)
+            .where(MealCategoryModel.id == category_id).values(**category_data)
+        )
         await self.db.commit()
-        await self.db.refresh(category)
-        return category
+
+        return await self.get_by_id(category_id)
 
     async def delete(self, category_id: int):
         category = await self.get_by_id(category_id)
@@ -63,12 +61,14 @@ class MealRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create(self, meal_data: MealCreate) -> MealModel:
-        meal_data.image_url = str(meal_data.image_url)
-        meal = MealModel(**meal_data.dict())
+    async def create(self, meal_data: dict[str, Any]) -> MealModel:
+        meal_data['image_url'] = str(meal_data['image_url'])
+        meal = MealModel(**meal_data)
         self.db.add(meal)
+
         await self.db.commit()
         await self.db.refresh(meal)
+
         return meal
 
     async def get_all_by_category(self, category_id: int) -> list[MealModel]:
@@ -79,7 +79,8 @@ class MealRepository:
 
     async def get_by_id(self, meal_id: int) -> MealModel | None:
         result = await self.db.execute(
-            select(MealModel).where(MealModel.id == meal_id))
+            select(MealModel).where(MealModel.id == meal_id)
+        )
         return result.scalar_one_or_none()
 
     async def update(
@@ -96,11 +97,10 @@ class MealRepository:
         )
         await self.db.commit()
 
-        result = await self.db.execute(
-            select(MealModel).where(MealModel.id == meal_id))
-        return result.scalar_one_or_none()
+        return await self.get_by_id(meal_id)
 
     async def delete(self, meal: MealModel):
         await self.db.delete(meal)
         await self.db.commit()
+
         return meal
