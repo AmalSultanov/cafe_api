@@ -23,11 +23,11 @@ class MealCategoryRepository:
 
         return category
 
-    async def get_all(self):
+    async def get_all(self) -> list[MealCategoryModel]:
         result = await self.db.execute(select(MealCategoryModel))
         return result.scalars().all()
 
-    async def get_by_id(self, category_id: int):
+    async def get_by_id(self, category_id: int) -> MealCategoryModel | None:
         result = await self.db.execute(
             select(MealCategoryModel)
             .where(MealCategoryModel.id == category_id)
@@ -48,12 +48,10 @@ class MealCategoryRepository:
 
         return await self.get_by_id(category_id)
 
-    async def delete(self, category_id: int):
-        category = await self.get_by_id(category_id)
+    async def delete(self, category: MealCategoryModel) -> MealCategoryModel:
+        await self.db.delete(category)
+        await self.db.commit()
 
-        if category:
-            await self.db.delete(category)
-            await self.db.commit()
         return category
 
 
@@ -62,7 +60,6 @@ class MealRepository:
         self.db = db
 
     async def create(self, meal_data: dict[str, Any]) -> MealModel:
-        meal_data['image_url'] = str(meal_data['image_url'])
         meal = MealModel(**meal_data)
         self.db.add(meal)
 
@@ -88,9 +85,6 @@ class MealRepository:
             meal_id: int,
             meal_data: dict[str, Any]
     ) -> MealModel | None:
-        if 'image_url' in meal_data and meal_data['image_url'] is not None:
-            meal_data['image_url'] = str(meal_data['image_url'])
-
         await self.db.execute(
             update(MealModel)
             .where(MealModel.id == meal_id).values(**meal_data)
@@ -99,7 +93,7 @@ class MealRepository:
 
         return await self.get_by_id(meal_id)
 
-    async def delete(self, meal: MealModel):
+    async def delete(self, meal: MealModel) -> MealModel:
         await self.db.delete(meal)
         await self.db.commit()
 
