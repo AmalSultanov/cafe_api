@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from src.dependencies import get_meal_service
+from src.core.dependencies import get_meal_service
 from src.exceptions.meal import MealNotFoundError, MealAlreadyExistsError
 from src.exceptions.meal_category import MealCategoryNotFoundError
 from src.schemas.meal import (
@@ -30,9 +30,7 @@ async def create_meal(
         )
 
 
-@router.get(
-    "/{category_id}/meals", response_model=list[MealRead]
-)
+@router.get("/{category_id}/meals", response_model=list[MealRead])
 async def get_meals(
     category_id: int, service: MealService = Depends(get_meal_service)
 ):
@@ -44,9 +42,7 @@ async def get_meals(
         )
 
 
-@router.get(
-    "/{category_id}/meals/{meal_id}", response_model=MealRead
-)
+@router.get("/{category_id}/meals/{meal_id}", response_model=MealRead)
 async def get_meal(
     category_id: int,
     meal_id: int,
@@ -64,9 +60,7 @@ async def get_meal(
         )
 
 
-@router.put(
-    "/{category_id}/meals/{meal_id}", response_model=MealRead
-)
+@router.put("/{category_id}/meals/{meal_id}", response_model=MealRead)
 async def update_meal(
     category_id: int,
     meal_id: int,
@@ -85,7 +79,7 @@ async def update_meal(
         )
 
 
-@router.patch("/{category_id}/meals/{meal_id}")
+@router.patch("/{category_id}/meals/{meal_id}", response_model=MealRead)
 async def partial_update_meal(
     category_id: int,
     meal_id: int,

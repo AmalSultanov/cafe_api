@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from src.dependencies import get_meal_category_service
+from src.core.dependencies import get_meal_category_service
 from src.exceptions.meal_category import (
     MealCategoryAlreadyExistsError, MealCategoryNotFoundError
 )

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from src.dependencies import get_user_service, get_user_identity_service
+from src.core.dependencies import get_user_service, get_user_identity_service
 from src.exceptions.user import UserAlreadyExistsError, UserNotFoundError
 from src.schemas.user import (
     UserRegister, UserRead, UserUpdate, UserPartialUpdate, IdentityCheck
@@ -11,7 +11,7 @@ from src.services.user_identity import UserIdentityService
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-@router.post("/register")
+@router.post("/register", response_model=UserRead)
 async def register(
     user_data: UserRegister, service: UserService = Depends(get_user_service)
 ):
