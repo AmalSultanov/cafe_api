@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 
-from src.config import POSTGRES_DATABASE_URL
+from src.core.config import POSTGRES_DATABASE_URL
 
 async_engine = create_async_engine(url=POSTGRES_DATABASE_URL, echo=True)
 async_session = async_sessionmaker(
