@@ -1,0 +1,35 @@
+from datetime import datetime
+from decimal import Decimal
+
+from sqlalchemy import ForeignKey, Text, Integer, String, Numeric
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+
+from src.database import Base
+
+
+class MealModel(Base):
+    __tablename__ = "meals"
+
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True
+    )
+    image_url: Mapped[str | None] = mapped_column(
+        String, unique=True, nullable=True
+    )
+    name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    category_id: Mapped[int] = mapped_column(
+        ForeignKey("meal_categories.id", ondelete="CASCADE"), nullable=False
+    )
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
+    category: Mapped["MealCategoryModel"] = relationship(
+        "MealCategoryModel", back_populates="meals"
+    )
+
+    repr_cols_num = 3
+    repr_cols = ("created_at",)
+
+    def __str__(self):
+        return self.name
