@@ -48,14 +48,18 @@ class MealCategoryRepository(IMealCategoryRepository):
     async def update(
         self, category_id: int, category_data: dict[str, str]
     ) -> MealCategoryModel:
-        await self.db.execute(
-            update(MealCategoryModel)
-            .where(MealCategoryModel.id == category_id)
-            .values(**category_data)
-        )
-        await self.db.commit()
+        try:
+            await self.db.execute(
+                update(MealCategoryModel)
+                .where(MealCategoryModel.id == category_id)
+                .values(**category_data)
+            )
+            await self.db.commit()
 
-        return await self.get_by_id(category_id)
+            return await self.get_by_id(category_id)
+        except IntegrityError:
+            await self.db.rollback()
+            raise MealCategoryAlreadyExistsError(category_data["name"])
 
     async def delete(self, category_id: int) -> None:
         await self.db.execute(
