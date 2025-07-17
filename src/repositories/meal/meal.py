@@ -43,7 +43,7 @@ class MealRepository(IMealRepository):
         )
         return result.scalar_one_or_none()
 
-    async def get_by_name(self, meal_name: int) -> MealModel | None:
+    async def get_by_name(self, meal_name: str) -> MealModel | None:
         result = await self.db.execute(
             select(MealModel).where(MealModel.name == meal_name)
         )
@@ -52,13 +52,17 @@ class MealRepository(IMealRepository):
     async def update(
         self, meal_id: int, meal_data: dict[str, int | str | Decimal]
     ) -> MealModel:
-        await self.db.execute(
-            update(MealModel)
-            .where(MealModel.id == meal_id).values(**meal_data)
-        )
-        await self.db.commit()
+        try:
+            await self.db.execute(
+                update(MealModel)
+                .where(MealModel.id == meal_id).values(**meal_data)
+            )
+            await self.db.commit()
 
-        return await self.get_by_id(meal_id)
+            return await self.get_by_id(meal_id)
+        except IntegrityError:
+            await self.db.rollback()
+            raise MealAlreadyExistsError(meal_data["name"])
 
     async def delete(self, meal_id: int) -> None:
         await self.db.execute(delete(MealModel).where(MealModel.id == meal_id))
