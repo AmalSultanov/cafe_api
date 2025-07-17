@@ -1,5 +1,4 @@
-from pydantic import HttpUrl
-
+from src.core.utils import url_to_str
 from src.exceptions.meal import MealNotFoundError, MealAlreadyExistsError
 from src.exceptions.meal_category import MealCategoryNotFoundError
 from src.models.meal import MealModel
@@ -27,7 +26,7 @@ class MealService:
             raise MealAlreadyExistsError(meal_data.name)
 
         if meal_data.image_url:
-            meal_data.image_url = await self.url_to_str(meal_data.image_url)
+            meal_data.image_url = url_to_str(meal_data.image_url)
 
         meal_dict = meal_data.model_dump()
         meal_dict["category_id"] = category_id
@@ -68,7 +67,7 @@ class MealService:
             raise MealNotFoundError(meal_id)
 
         if hasattr(meal_data, "image_url") and meal_data.image_url is not None:
-            meal_data.image_url = await self.url_to_str(meal_data.image_url)
+            meal_data.image_url = url_to_str(meal_data.image_url)
 
         data = (
             meal_data.model_dump(exclude_unset=True)
@@ -76,11 +75,13 @@ class MealService:
             else meal_data.model_dump()
         )
 
-        return await self.meal_repo.update(meal_id, data)
+        if "name" in data:
+            existing = await self.meal_repo.get_by_name(data["name"])
 
-    @staticmethod
-    async def url_to_str(image_url: HttpUrl) -> str:
-        return str(image_url)
+            if existing and existing.id != meal_id:
+                raise MealAlreadyExistsError(data["name"])
+
+        return await self.meal_repo.update(meal_id, data)
 
     async def delete_meal(self, category_id: int, meal_id: int) -> None:
         if not await self.category_repo.get_by_id(category_id):
