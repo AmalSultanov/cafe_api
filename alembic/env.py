@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
-from src.config import SQL_DATABASE_URL
+from src.core.config import POSTGRES_DATABASE_URL
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -18,14 +18,11 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", SQL_DATABASE_URL)
+config.set_main_option("sqlalchemy.url", POSTGRES_DATABASE_URL)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from src.models.meal import *
-from src.models.meal_category import *
-from src.models.user import *
-from src.database import Base
+from src.core.database import Base
 
 target_metadata = Base.metadata
 # target_metadata = None
