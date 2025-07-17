@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
-from src.database import Base
+from src.core.database import Base
 
 
 class MealCategoryModel(Base):

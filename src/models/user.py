@@ -6,7 +6,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
-from src.database import Base
+from src.core.database import Base
 
 
 class IdentityProviderEnum(enum.Enum):
@@ -74,17 +74,3 @@ class UserIdentityModel(Base):
 
     def __str__(self):
         return f"{self.provider} user with provider_id={self.provider_id}"
-
-
-# class TelegramIdentityModel(Base):
-#     __tablename__ = "telegram_identities"
-#
-#     id: Mapped[int] = mapped_column(
-#         Integer, primary_key=True, autoincrement=True
-#     )
-#     identity_id: Mapped[int] = mapped_column(
-#         ForeignKey("user_identities.id", ondelete="CASCADE"), unique=True
-#     )
-#     telegram_username: Mapped[str | None] = mapped_column(String(50))
-#
-#     identity: Mapped[UserIdentityModel] = relationship(backref="telegram_identity")
