@@ -23,6 +23,12 @@ config.set_main_option("sqlalchemy.url", POSTGRES_DATABASE_URL)
 # add your model's MetaData object here
 # for 'autogenerate' support
 from src.core.database import Base
+from src.models.meal import MealModel
+from src.models.meal_category import MealCategoryModel
+from src.models.user import UserModel
+from src.models.user import UserIdentityModel
+from src.models.cart import CartModel
+from src.models.cart_item import CartItemModel
 
 target_metadata = Base.metadata
 # target_metadata = None
