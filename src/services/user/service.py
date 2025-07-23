@@ -37,6 +37,14 @@ class UserService:
             raise HTTPException(status_code=404, detail="User not found")
         # ...SMS verification...
 
+    async def provider_id_to_user_id(self, user_data: IdentityCheck):
+        identity_data = user_data.model_dump(
+            include={"provider", "provider_id"}
+        )
+        user = await self.user_identity_repo.get_by_provider(identity_data)
+        if user:
+            return user.user_id
+
     async def get_users(self) -> list[UserModel]:
         return await self.user_repo.get_all()
 

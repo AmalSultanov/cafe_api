@@ -1,5 +1,5 @@
 from src.models.user import UserIdentityModel
-from src.repositories.user.identity_interface import IUserIdentityRepository
+from src.repositories.user.user_identity_interface import IUserIdentityRepository
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 

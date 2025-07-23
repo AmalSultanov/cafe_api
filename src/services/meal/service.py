@@ -51,6 +51,14 @@ class MealService:
             raise MealNotFoundError(meal_id)
         return meal
 
+    async def get_meal_by_id(self, meal_id: int) -> MealModel:
+        meal = await self.meal_repo.get_by_id(meal_id)
+
+        if not meal:
+            raise MealNotFoundError(meal_id)
+
+        return meal
+
     async def update_meal(
         self,
         category_id: int,

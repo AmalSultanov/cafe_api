@@ -32,6 +32,12 @@ class UserModel(Base):
     identities: Mapped[list["UserIdentityModel"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    cart: Mapped["CartModel"] = relationship(
+        "CartModel",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan"
+    )
 
     repr_cols_num = 2
     repr_cols = ("created_at",)
@@ -42,10 +48,13 @@ class UserModel(Base):
 
 class UserIdentityModel(Base):
     __tablename__ = "user_identities"
-    __table_args__ = ((
+    __table_args__ = (
         UniqueConstraint(
             "provider", "provider_id", name="uq_provider_provider_id"
-        )),
+        ),
+        UniqueConstraint(
+            "provider", "username", name="uq_provider_username"
+        )
     )
 
     id: Mapped[int] = mapped_column(
@@ -62,7 +71,7 @@ class UserIdentityModel(Base):
         )
     )
     provider_id: Mapped[str] = mapped_column(String, nullable=False)
-    username: Mapped[str | None] = mapped_column(String, nullable=True)
+    username: Mapped[str | None] = mapped_column(String, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow
     )
