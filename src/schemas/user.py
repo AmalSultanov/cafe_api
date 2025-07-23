@@ -9,16 +9,36 @@ class ProviderEnum(str, Enum):
     web = "web"
 
 
+class IdentityBase(BaseModel):
+    provider: ProviderEnum
+    provider_id: str
+    username: str
+
+
+class IdentityCheck(BaseModel):
+    provider: ProviderEnum
+    provider_id: str
+
+
+class IdentityCreate(IdentityBase):
+    pass
+
+
+class IdentityRead(IdentityBase):
+    id: int
+    user_id: int
+    created_at: datetime
+    model_config = {"from_attributes": True}
+
+
+class IdentityStatusResponse(BaseModel):
+    status: str
+
+
 class UserBase(BaseModel):
     name: str | None
     surname: str | None
     phone_number: str
-
-
-class IdentityBase(BaseModel):
-    provider: ProviderEnum
-    provider_id: str
-    username: str | None
 
 
 class UserRegister(UserBase, IdentityBase):
@@ -28,17 +48,13 @@ class UserRegister(UserBase, IdentityBase):
 class UserRead(UserBase):
     id: int
     created_at: datetime
+    model_config = {"from_attributes": True}
 
 
-class UserUpdate(UserBase):
-    pass
+class UserPutUpdate(UserBase):
+    name: str
+    surname: str
 
 
-class UserPartialUpdate(BaseModel):
-    name: str | None = None
-    surname: str | None = None
-    phone_number: str | None = None
-
-
-class IdentityCheck(IdentityBase):
-    pass
+class UserPatchUpdate(UserBase):
+    phone_number: str | None
