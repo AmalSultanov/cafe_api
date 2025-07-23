@@ -8,7 +8,7 @@ class MealBase(BaseModel):
     image_url: HttpUrl | None = None
     name: str
     description: str
-    price: Decimal
+    unit_price: Decimal
 
     model_config = ConfigDict(json_encoders={
         Decimal: lambda v: format(v, "f")
@@ -23,6 +23,7 @@ class MealRead(MealBase):
     id: int
     category_id: int
     created_at: datetime
+    model_config = {"from_attributes": True}
 
 
 class MealPutUpdate(MealBase):
@@ -33,4 +34,4 @@ class MealUpdate(BaseModel):
     image_url: HttpUrl | None = None
     name: str | None = None
     description: str | None = None
-    price: Decimal | None = Field(default=None, gt=0)
+    unit_price: Decimal | None = Field(default=None, gt=0)
