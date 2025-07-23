@@ -1,86 +1,95 @@
-from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 
-from src.exceptions.user import UserAlreadyExistsError, UserNotFoundError
-from src.models.user import UserModel
-from src.repositories.user.identity_interface import IUserIdentityRepository
+from src.exceptions.user import (
+    UserAlreadyExistsError, UserNotFoundError, UserPhoneAlreadyExistsError,
+    NoUserUpdateDataError, UserIdentityAlreadyExistsError
+)
 from src.repositories.user.interface import IUserRepository
-from src.schemas.user import UserRegister, UserUpdate, UserPartialUpdate, \
-    IdentityCheck
+from src.schemas.user import (
+    UserRegister, UserPutUpdate, UserPatchUpdate, UserRead, IdentityCheck,
+    IdentityCreate
+)
+from src.services.user.identity.interface import IUserIdentityService
 
 
 class UserService:
     def __init__(
         self,
-        user_repo: IUserRepository,
-        user_identity_repo: IUserIdentityRepository
-    ):
-        self.user_repo = user_repo
-        self.user_identity_repo = user_identity_repo
+        repository: IUserRepository,
+        identity_service: IUserIdentityService
+    ) -> None:
+        self.repository = repository
+        self.identity_service = identity_service
 
-    async def create_user(self, user_data: UserRegister) -> UserModel:
-        identity_data = user_data.model_dump(
-            include={"provider", "provider_id", "username"}
+    async def create_user(self, user_data: UserRegister) -> UserRead:
+        identity_check = IdentityCheck(
+            provider=user_data.provider,
+            provider_id=user_data.provider_id
         )
 
-        if await self.user_identity_repo.get_by_provider(identity_data):
-            raise UserAlreadyExistsError(user_data.username)
+        if await self.identity_service.identity_exists(identity_check):
+            raise UserAlreadyExistsError(
+                user_data.username, user_data.provider
+            )
 
-        user = await self.user_repo.create(user_data.model_dump())
-        await self.user_identity_repo.create(user.id, identity_data)
+        try:
+            user = await self.repository.create(user_data.model_dump(
+                exclude={"provider", "provider_id", "username"}
+            ))
+        except IntegrityError:
+            raise UserAlreadyExistsError(
+                user_data.username, user_data.provider
+            )
 
-        return user
+        new_identity = IdentityCreate.model_validate(user_data)
+
+        try:
+            await self.identity_service.create_identity(user.id, new_identity)
+        except UserIdentityAlreadyExistsError:
+            raise
+        return UserRead.model_validate(user)
 
     async def log_in_user(self, phone_number: str):
-        user = await self.user_repo.get_by_phone(phone_number)
-
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
         # ...SMS verification...
+        ...
 
-    async def provider_id_to_user_id(self, user_data: IdentityCheck):
-        identity_data = user_data.model_dump(
-            include={"provider", "provider_id"}
-        )
-        user = await self.user_identity_repo.get_by_provider(identity_data)
-        if user:
-            return user.user_id
+    async def get_users(self) -> list[UserRead]:
+        users = await self.repository.get_all()
+        return [UserRead.model_validate(user) for user in users]
 
-    async def get_users(self) -> list[UserModel]:
-        return await self.user_repo.get_all()
-
-    async def get_user(self, user_id: int) -> UserModel | None:
-        user = await self.user_repo.get_by_id(user_id)
+    async def get_user(self, user_id: int) -> UserRead | None:
+        user = await self.repository.get_by_id(user_id)
 
         if not user:
             raise UserNotFoundError(user_id)
-        return user
+        return UserRead.model_validate(user)
 
     async def update_user(
-        self, user_id: int, user_data: UserUpdate
-    ) -> UserModel | None:
-        user = await self.user_repo.get_by_id(user_id)
-
-        if not user:
-            raise UserNotFoundError(user_id)
-
-        return await self.user_repo.update(user_id, user_data.model_dump())
-
-    async def partial_update_user(
-        self, user_id: int, user_data: UserPartialUpdate
-    ) -> UserModel | None:
-        user = await self.user_repo.get_by_id(user_id)
-
-        if not user:
-            raise UserNotFoundError(user_id)
-
-        return await self.user_repo.update(
-            user_id, user_data.model_dump(exclude_unset=True)
+        self,
+        user_id: int,
+        user_data: UserPutUpdate | UserPatchUpdate,
+        is_partial: bool = False
+    ) -> UserRead | None:
+        new_data = (
+            user_data.model_dump(exclude_unset=True) if is_partial
+            else user_data.model_dump()
         )
 
+        if not new_data:
+            raise NoUserUpdateDataError()
+        if not await self.repository.get_by_id(user_id):
+            raise UserNotFoundError(user_id)
+
+        try:
+            upd_user = await self.repository.update(user_id, new_data)
+        except IntegrityError:
+            raise UserPhoneAlreadyExistsError(new_data["phone_number"])
+        return UserRead.model_validate(upd_user)
+
     async def delete_user(self, user_id: int) -> None:
-        user = await self.user_repo.get_by_id(user_id)
+        user = await self.repository.get_by_id(user_id)
 
         if not user:
             raise UserNotFoundError(user_id)
 
-        return await self.user_repo.delete(user_id)
+        return await self.repository.delete(user_id)
