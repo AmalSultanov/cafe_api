@@ -1,11 +1,11 @@
 from sqlalchemy import select, update, delete
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.user import UserModel
-from src.repositories.user.interface import IUserRepository
 
 
-class UserRepository(IUserRepository):
+class UserRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
@@ -16,8 +16,14 @@ class UserRepository(IUserRepository):
             phone_number=user_data["phone_number"]
         )
         self.db.add(user)
-        await self.db.flush()
-        return user
+
+        try:
+            await self.db.commit()
+            await self.db.refresh(user)
+            return user
+        except IntegrityError:
+            await self.db.rollback()
+            raise
 
     async def get_all(self) -> list[UserModel]:
         result = await self.db.execute(select(UserModel))
@@ -37,16 +43,20 @@ class UserRepository(IUserRepository):
 
     async def update(
         self, user_id: int, user_data: dict[str, str]
-    ) -> UserModel | None:
+    ) -> UserModel:
         await self.db.execute(
             update(UserModel)
             .where(UserModel.id == user_id)
             .values(**user_data)
         )
-        await self.db.commit()
-        return await self.get_by_id(user_id)
 
-    async def delete(self, user_id: id) -> None:
+        try:
+            await self.db.commit()
+            return await self.get_by_id(user_id)
+        except IntegrityError:
+            await self.db.rollback()
+            raise
+
+    async def delete(self, user_id: int) -> None:
         await self.db.execute(delete(UserModel).where(UserModel.id == user_id))
         await self.db.commit()
-

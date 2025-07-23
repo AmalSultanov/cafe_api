@@ -1,10 +1,11 @@
+from sqlalchemy.exc import IntegrityError
+
 from src.models.user import UserIdentityModel
-from src.repositories.user.user_identity_interface import IUserIdentityRepository
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class UserIdentityRepository(IUserIdentityRepository):
+class UserIdentityRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
@@ -19,9 +20,13 @@ class UserIdentityRepository(IUserIdentityRepository):
         )
         self.db.add(identity)
 
-        await self.db.commit()
-        await self.db.refresh(identity)
-        return identity
+        try:
+            await self.db.commit()
+            await self.db.refresh(identity)
+            return identity
+        except IntegrityError:
+            await self.db.rollback()
+            raise
 
     async def get_by_provider(
         self, identity_data: dict[str, str]
@@ -30,7 +35,7 @@ class UserIdentityRepository(IUserIdentityRepository):
             select(UserIdentityModel)
             .where(
                 UserIdentityModel.provider == identity_data["provider"],
-                UserIdentityModel.provider_id == identity_data["provider_id"],
+                UserIdentityModel.provider_id == identity_data["provider_id"]
             )
         )
         return result.scalar_one_or_none()

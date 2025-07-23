@@ -5,29 +5,26 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from src.exceptions.meal import MealAlreadyExistsError
 from src.models.meal import MealModel
-from src.repositories.meal.interface import IMealRepository
 
 
-class MealRepository(IMealRepository):
+class MealRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
     async def create(
         self, meal_data: dict[str, int | str | Decimal]
     ) -> MealModel:
-        try:
-            meal = MealModel(**meal_data)
-            self.db.add(meal)
+        meal = MealModel(**meal_data)
+        self.db.add(meal)
 
+        try:
             await self.db.commit()
             await self.db.refresh(meal)
-
             return meal
         except IntegrityError:
             await self.db.rollback()
-            raise MealAlreadyExistsError(meal_data["name"])
+            raise
 
     async def get_all_by_category_id(
         self, category_id: int
@@ -52,17 +49,18 @@ class MealRepository(IMealRepository):
     async def update(
         self, meal_id: int, meal_data: dict[str, int | str | Decimal]
     ) -> MealModel:
-        try:
-            await self.db.execute(
-                update(MealModel)
-                .where(MealModel.id == meal_id).values(**meal_data)
-            )
-            await self.db.commit()
+        await self.db.execute(
+            update(MealModel)
+            .where(MealModel.id == meal_id)
+            .values(**meal_data)
+        )
 
+        try:
+            await self.db.commit()
             return await self.get_by_id(meal_id)
         except IntegrityError:
             await self.db.rollback()
-            raise MealAlreadyExistsError(meal_data["name"])
+            raise
 
     async def delete(self, meal_id: int) -> None:
         await self.db.execute(delete(MealModel).where(MealModel.id == meal_id))
