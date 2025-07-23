@@ -4,6 +4,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+FASTAPI_HOST = os.getenv("FASTAPI_HOST")
+FASTAPI_PORT = int(os.getenv("FASTAPI_PORT"))
+FASTAPI_DEBUG = os.getenv("FASTAPI_DEBUG")
+FASTAPI_VERSION = os.getenv("FASTAPI_VERSION")
+
 POSTGRES_DB = os.getenv("POSTGRES_DB")
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
