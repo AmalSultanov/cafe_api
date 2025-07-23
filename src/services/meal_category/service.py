@@ -1,58 +1,67 @@
+from sqlalchemy.exc import IntegrityError
+
 from src.exceptions.meal_category import (
     MealCategoryAlreadyExistsError, MealCategoryNotFoundError,
     NoMealCategoryUpdateDataError
 )
-from src.models.meal_category import MealCategoryModel
 from src.repositories.meal_category.interface import IMealCategoryRepository
 from src.schemas.meal_category import (
-    MealCategoryPatchUpdate, MealCategoryCreate
+    MealCategoryPatchUpdate, MealCategoryCreate, MealCategoryRead
 )
 
 
 class MealCategoryService:
-    def __init__(self, category_repo: IMealCategoryRepository):
-        self.category_repo = category_repo
+    def __init__(self, repository: IMealCategoryRepository) -> None:
+        self.repository = repository
 
     async def create_category(
         self, category_data: MealCategoryCreate
-    ) -> MealCategoryModel:
+    ) -> MealCategoryRead:
         category_dict = category_data.model_dump()
 
-        if await self.category_repo.get_by_name(category_dict["name"]):
+        try:
+            category = await self.repository.create(category_dict)
+        except IntegrityError:
             raise MealCategoryAlreadyExistsError(category_dict["name"])
-        return await self.category_repo.create(category_dict)
+        return MealCategoryRead.model_validate(category)
 
-    async def get_categories(self) -> list[MealCategoryModel]:
-        return await self.category_repo.get_all()
+    async def get_categories(self) -> list[MealCategoryRead]:
+        categories = await self.repository.get_all()
+        return [
+            MealCategoryRead.model_validate(category)
+            for category in categories
+        ]
 
-    async def get_category(self, category_id: int) -> MealCategoryModel:
-        category = await self.category_repo.get_by_id(category_id)
+    async def get_category(self, category_id: int) -> MealCategoryRead:
+        category = await self.repository.get_by_id(category_id)
 
         if not category:
             raise MealCategoryNotFoundError(category_id)
-        return category
+        return MealCategoryRead.model_validate(category)
 
     async def update_category(
         self, category_id: int, category_data: MealCategoryPatchUpdate
-    ) -> MealCategoryModel:
+    ) -> MealCategoryRead:
         new_data = category_data.model_dump(exclude_unset=True)
 
         if not new_data:
             raise NoMealCategoryUpdateDataError()
 
-        category = await self.category_repo.get_by_id(category_id)
-
+        category = await self.repository.get_by_id(category_id)
         if not category:
             raise MealCategoryNotFoundError(category_id)
-        if category.name == category_data.name:
+        if category_data.name and category.name == category_data.name:
             raise MealCategoryAlreadyExistsError(category_data.name)
 
-        return await self.category_repo.update(category_id, new_data)
+        try:
+            upd_category = await self.repository.update(category_id, new_data)
+        except IntegrityError:
+            raise MealCategoryAlreadyExistsError(new_data["name"])
+        return MealCategoryRead.model_validate(upd_category)
 
     async def delete_category(self, category_id: int) -> None:
-        category = await self.category_repo.get_by_id(category_id)
+        category = await self.repository.get_by_id(category_id)
 
         if not category:
             raise MealCategoryNotFoundError(category_id)
-
-        return await self.category_repo.delete(category_id)
+        await self.repository.delete(category_id)
