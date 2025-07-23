@@ -14,6 +14,7 @@ class MealCategoryCreate(MealCategoryBase):
 class MealCategoryRead(MealCategoryBase):
     id: int
     created_at: datetime
+    model_config = {"from_attributes": True}
 
 
 class MealCategoryPatchUpdate(BaseModel):
