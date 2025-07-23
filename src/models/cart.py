@@ -4,10 +4,12 @@ from sqlalchemy import ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.database import Base
+from src.schemas.cart import CartRead
 
 
 class CartModel(Base):
     __tablename__ = "carts"
+    __pydantic_model__ = CartRead
 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True

@@ -5,10 +5,12 @@ from sqlalchemy import ForeignKey, Text, Integer, String, Numeric
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from src.core.database import Base
+from src.schemas.meal import MealRead
 
 
 class MealModel(Base):
     __tablename__ = "meals"
+    __pydantic_model__ = MealRead
 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True
