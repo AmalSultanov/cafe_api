@@ -21,11 +21,14 @@ class MealModel(Base):
         ForeignKey("meal_categories.id", ondelete="CASCADE"), nullable=False
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    unit_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     category: Mapped["MealCategoryModel"] = relationship(
         "MealCategoryModel", back_populates="meals"
+    )
+    cart_items: Mapped["CartItemModel"] = relationship(
+        "CartItemModel", back_populates="meal", cascade="all, delete-orphan"
     )
 
     repr_cols_num = 3
