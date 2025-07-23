@@ -1,31 +1,25 @@
-from abc import ABC, abstractmethod
+from typing import Protocol
 
 from src.models.user import UserModel
 
 
-class IUserRepository(ABC):
-    @abstractmethod
+class IUserRepository(Protocol):
     async def create(self, user_data: dict[str, int, str]) -> UserModel:
-        pass
+        ...
 
-    @abstractmethod
     async def get_all(self) -> list[UserModel]:
-        pass
+        ...
 
-    @abstractmethod
-    async def get_by_id(self, user_id: int) -> UserModel:
-        pass
+    async def get_by_id(self, user_id: int) -> UserModel | None:
+        ...
 
-    @abstractmethod
-    async def get_by_phone(self, phone_number: str) -> UserModel:
-        pass
+    async def get_by_phone(self, phone_number: str) -> UserModel | None:
+        ...
 
-    @abstractmethod
     async def update(
         self, user_id: int, user_data: dict[str, int, str]
     ) -> UserModel:
-        pass
+        ...
 
-    @abstractmethod
     async def delete(self, user_id: int) -> None:
-        pass
+        ...
