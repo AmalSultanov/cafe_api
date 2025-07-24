@@ -133,7 +133,9 @@ async def update_cart_item(
     service: ICartItemService = Depends(get_cart_item_service),
 ):
     try:
-        return await service.update_cart_item(user_id, item_id, item_data)
+        return await service.update_cart_item(
+            user_id, item_id, item_data, True
+        )
     except NoCartItemUpdateDataError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)

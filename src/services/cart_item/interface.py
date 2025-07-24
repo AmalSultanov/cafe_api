@@ -1,7 +1,7 @@
 from typing import Protocol
 
 from src.schemas.cart_item import (
-    CartItemCreate, CartItemPatchUpdate, CartItemRead
+    CartItemCreate, CartItemPatchUpdate, CartItemRead, CartItemPutUpdate
 )
 
 
@@ -20,7 +20,11 @@ class ICartItemService(Protocol):
         ...
 
     async def update_cart_item(
-        self, user_id: int, item_id: int, item_data: CartItemPatchUpdate
+        self,
+        user_id: int,
+        item_id: int,
+        item_data: CartItemPutUpdate | CartItemPatchUpdate,
+        is_partial: bool = False
     ) -> CartItemRead:
         ...
 
