@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from src.exceptions.cart_item import CartItemQuantityError
 
@@ -20,8 +20,8 @@ class CartItemCreate(CartItemBase):
         return value
 
 
-class CartItemPutUpdate(CartItemBase):
-    pass
+class CartItemPutUpdate(BaseModel):
+    quantity: int
 
 
 class CartItemPatchUpdate(BaseModel):
