@@ -2,7 +2,8 @@ from typing import Protocol
 
 from src.schemas.common import PaginationParams
 from src.schemas.meal_category import (
-    MealCategoryPatchUpdate, MealCategoryCreate, MealCategoryRead
+    MealCategoryPatchUpdate, MealCategoryCreate, MealCategoryRead,
+    PaginatedMealCategoryResponse
 )
 
 
@@ -13,8 +14,8 @@ class IMealCategoryService(Protocol):
         ...
 
     async def get_categories(
-        self, paginated_data: PaginationParams
-    ) -> list[MealCategoryRead]:
+        self, pagination_params: PaginationParams
+    ) -> PaginatedMealCategoryResponse:
         ...
 
     async def get_category(self, category_id: int) -> MealCategoryRead:

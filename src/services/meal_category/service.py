@@ -28,20 +28,20 @@ class MealCategoryService:
         return MealCategoryRead.model_validate(category)
 
     async def get_categories(
-        self, paginated_data: PaginationParams
+        self, pagination_params: PaginationParams
     ) -> PaginatedMealCategoryResponse:
-        offset = (paginated_data.page - 1) * paginated_data.per_page
+        offset = (pagination_params.page - 1) * pagination_params.per_page
         categories = await self.repository.get_all(
-            paginated_data.per_page, offset
+            pagination_params.per_page, offset
         )
         total = await self.repository.get_total_count()
         total_pages = (
-            (total + paginated_data.per_page - 1) // paginated_data.per_page
+            (total + pagination_params.per_page - 1) // pagination_params.per_page
         )
 
         return PaginatedMealCategoryResponse(
             total=total,
-            page=paginated_data.page,
+            page=pagination_params.page,
             total_pages=total_pages,
             items=[MealCategoryRead.model_validate(c) for c in categories]
         )
