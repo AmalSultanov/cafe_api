@@ -5,9 +5,10 @@ from src.exceptions.user import (
     NoUserUpdateDataError, UserIdentityAlreadyExistsError
 )
 from src.repositories.user.interface import IUserRepository
+from src.schemas.common import PaginationParams
 from src.schemas.user import (
     UserRegister, UserPutUpdate, UserPatchUpdate, UserRead, IdentityCheck,
-    IdentityCreate
+    IdentityCreate, PaginatedUserResponse
 )
 from src.services.user.identity.interface import IUserIdentityService
 
@@ -53,9 +54,24 @@ class UserService:
         # ...SMS verification...
         ...
 
-    async def get_users(self) -> list[UserRead]:
-        users = await self.repository.get_all()
-        return [UserRead.model_validate(user) for user in users]
+    async def get_users(
+        self, pagination_params: PaginationParams
+    ) -> PaginatedUserResponse:
+        offset = (pagination_params.page - 1) * pagination_params.per_page
+        users = await self.repository.get_all(
+            pagination_params.per_page, offset
+        )
+        total = await self.repository.get_total_count()
+        total_pages = (
+            (total + pagination_params.per_page - 1) // pagination_params.per_page
+        )
+
+        return PaginatedUserResponse(
+            total=total,
+            page=pagination_params.page,
+            total_pages=total_pages,
+            items=[UserRead.model_validate(user) for user in users]
+        )
 
     async def get_user(self, user_id: int) -> UserRead | None:
         user = await self.repository.get_by_id(user_id)

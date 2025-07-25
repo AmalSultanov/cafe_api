@@ -9,10 +9,11 @@ from src.exceptions.user import (
     UserPhoneAlreadyExistsError, NoUserUpdateDataError,
     UserIdentityAlreadyExistsError
 )
+from src.schemas.common import PaginationParams
 from src.schemas.http_error import HTTPError
 from src.schemas.user import (
     UserRegister, UserRead, IdentityCheck, UserPutUpdate, UserPatchUpdate,
-    IdentityRead, IdentityStatusResponse
+    IdentityRead, IdentityStatusResponse, PaginatedUserResponse
 )
 from src.services.user.identity.interface import IUserIdentityService
 from src.services.user.interface import IUserService
@@ -122,12 +123,18 @@ async def get_user_by_provider(
 
 @router.get(
     "",
-    response_model=list[UserRead],
-    description="Retrieve a list of all registered users.",
-    response_description="List of users"
+    response_model=PaginatedUserResponse,
+    description=(
+        "Retrieve a paginated list of all registered users. Supports "
+        "`page` (page number) and `per_page` (page size) query parameters."
+    ),
+    response_description="Paginated list of users"
 )
-async def get_users(service: IUserService = Depends(get_user_service)):
-    return await service.get_users()
+async def get_users(
+    pagination_params: PaginationParams = Depends(PaginationParams),
+    service: IUserService = Depends(get_user_service)
+):
+    return await service.get_users(pagination_params)
 
 
 @router.get(

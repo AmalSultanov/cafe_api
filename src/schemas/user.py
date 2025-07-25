@@ -3,6 +3,8 @@ from enum import Enum
 
 from pydantic import BaseModel
 
+from src.schemas.common import PaginatedBaseResponse
+
 
 class ProviderEnum(str, Enum):
     telegram = "telegram"
@@ -45,12 +47,6 @@ class UserRegister(UserBase, IdentityBase):
     pass
 
 
-class UserRead(UserBase):
-    id: int
-    created_at: datetime
-    model_config = {"from_attributes": True}
-
-
 class UserPutUpdate(UserBase):
     name: str
     surname: str
@@ -58,3 +54,13 @@ class UserPutUpdate(UserBase):
 
 class UserPatchUpdate(UserBase):
     phone_number: str | None
+
+
+class UserRead(UserBase):
+    id: int
+    created_at: datetime
+    model_config = {"from_attributes": True}
+
+
+class PaginatedUserResponse(PaginatedBaseResponse):
+    items: list[UserRead]

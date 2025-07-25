@@ -1,4 +1,4 @@
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,8 +25,10 @@ class UserRepository:
             await self.db.rollback()
             raise
 
-    async def get_all(self) -> list[UserModel]:
-        result = await self.db.execute(select(UserModel))
+    async def get_all(self, limit: int, offset: int) -> list[UserModel]:
+        result = await self.db.execute(
+            select(UserModel).limit(limit).offset(offset)
+        )
         return result.scalars().all()
 
     async def get_by_id(self, user_id: int) -> UserModel | None:
@@ -40,6 +42,12 @@ class UserRepository:
             select(UserModel).where(UserModel.phone_number == phone_number)
         )
         return result.scalar_one_or_none()
+
+    async def get_total_count(self) -> int:
+        result = await self.db.execute(
+            select(func.count()).select_from(UserModel)
+        )
+        return result.scalar_one()
 
     async def update(
         self, user_id: int, user_data: dict[str, str]
