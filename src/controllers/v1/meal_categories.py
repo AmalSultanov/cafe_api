@@ -52,10 +52,10 @@ async def create_category(
     response_description="Paginated list of meal categories"
 )
 async def get_categories(
-    paginated_data: PaginationParams = Depends(PaginationParams),
+    pagination_params: PaginationParams = Depends(PaginationParams),
     service: IMealCategoryService = Depends(get_meal_category_service)
 ):
-    return await service.get_categories(paginated_data)
+    return await service.get_categories(pagination_params)
 
 
 @router.get(
