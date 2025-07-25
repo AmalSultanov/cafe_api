@@ -5,8 +5,10 @@ from src.exceptions.meal_category import (
     NoMealCategoryUpdateDataError
 )
 from src.repositories.meal_category.interface import IMealCategoryRepository
+from src.schemas.common import PaginationParams
 from src.schemas.meal_category import (
-    MealCategoryPatchUpdate, MealCategoryCreate, MealCategoryRead
+    MealCategoryPatchUpdate, MealCategoryCreate, MealCategoryRead,
+    PaginatedMealCategoryResponse
 )
 
 
@@ -25,12 +27,24 @@ class MealCategoryService:
             raise MealCategoryAlreadyExistsError(category_dict["name"])
         return MealCategoryRead.model_validate(category)
 
-    async def get_categories(self) -> list[MealCategoryRead]:
-        categories = await self.repository.get_all()
-        return [
-            MealCategoryRead.model_validate(category)
-            for category in categories
-        ]
+    async def get_categories(
+        self, paginated_data: PaginationParams
+    ) -> PaginatedMealCategoryResponse:
+        offset = (paginated_data.page - 1) * paginated_data.per_page
+        categories = await self.repository.get_all(
+            paginated_data.per_page, offset
+        )
+        total = await self.repository.get_total_count()
+        total_pages = (
+            (total + paginated_data.per_page - 1) // paginated_data.per_page
+        )
+
+        return PaginatedMealCategoryResponse(
+            total=total,
+            page=paginated_data.page,
+            total_pages=total_pages,
+            items=[MealCategoryRead.model_validate(c) for c in categories]
+        )
 
     async def get_category(self, category_id: int) -> MealCategoryRead:
         category = await self.repository.get_by_id(category_id)

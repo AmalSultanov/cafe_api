@@ -5,9 +5,11 @@ from src.exceptions.meal_category import (
     MealCategoryAlreadyExistsError, MealCategoryNotFoundError,
     NoMealCategoryUpdateDataError
 )
+from src.schemas.common import PaginationParams
 from src.schemas.http_error import HTTPError
 from src.schemas.meal_category import (
-    MealCategoryRead, MealCategoryCreate, MealCategoryPatchUpdate
+    MealCategoryRead, MealCategoryCreate, MealCategoryPatchUpdate,
+    PaginatedMealCategoryResponse
 )
 from src.services.meal_category.interface import IMealCategoryService
 
@@ -42,14 +44,18 @@ async def create_category(
 
 @router.get(
     "",
-    response_model=list[MealCategoryRead],
-    description="Retrieve a list of all existing meal categories.",
-    response_description="List of meal categories"
+    response_model=PaginatedMealCategoryResponse,
+    description=(
+        "Retrieve a paginated list of all existing meal categories. Supports "
+        "`page` (page number) and `per_page` (page size) query parameters."
+    ),
+    response_description="Paginated list of meal categories"
 )
 async def get_categories(
+    paginated_data: PaginationParams = Depends(PaginationParams),
     service: IMealCategoryService = Depends(get_meal_category_service)
 ):
-    return await service.get_categories()
+    return await service.get_categories(paginated_data)
 
 
 @router.get(

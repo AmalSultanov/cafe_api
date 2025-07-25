@@ -1,4 +1,4 @@
-from sqlalchemy import update, delete
+from sqlalchemy import update, delete, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -22,8 +22,12 @@ class MealCategoryRepository:
             await self.db.rollback()
             raise
 
-    async def get_all(self) -> list[MealCategoryModel]:
-        result = await self.db.execute(select(MealCategoryModel))
+    async def get_all(
+        self, limit: int, offset: int
+    ) -> list[MealCategoryModel]:
+        result = await self.db.execute(
+            select(MealCategoryModel).limit(limit).offset(offset)
+        )
         return result.scalars().all()
 
     async def get_by_id(self, category_id: int) -> MealCategoryModel | None:
@@ -41,6 +45,12 @@ class MealCategoryRepository:
             .where(MealCategoryModel.name == category_name)
         )
         return result.scalar_one_or_none()
+
+    async def get_total_count(self) -> int:
+        result = await self.db.execute(
+            select(func.count()).select_from(MealCategoryModel)
+        )
+        return result.scalar_one()
 
     async def update(
         self, category_id: int, category_data: dict[str, str]
