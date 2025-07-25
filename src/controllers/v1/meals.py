@@ -5,8 +5,11 @@ from src.exceptions.meal import (
     MealNotFoundError, MealAlreadyExistsError, NoMealUpdateDataError
 )
 from src.exceptions.meal_category import MealCategoryNotFoundError
+from src.schemas.common import PaginationParams
 from src.schemas.http_error import HTTPError
-from src.schemas.meal import MealRead, MealCreate, MealUpdate, MealPutUpdate
+from src.schemas.meal import (
+    MealRead, MealCreate, MealUpdate, MealPutUpdate, PaginatedMealResponse
+)
 from src.services.meal.interface import IMealService
 
 router = APIRouter(prefix="/meal-categories", tags=["Meals"])
@@ -52,11 +55,14 @@ async def create_meal(
 
 @router.get(
     "/{category_id}/meals",
-    response_model=list[MealRead],
+    response_model=PaginatedMealResponse,
     description=(
-        "Fetch a list of all meals that belong to the specified meal category."
+        "Fetch a paginated list of all meals that belong to the specified "
+        "meal category. Supports `page` (page number) and "
+        "`per_page` (page size) query parameters. `total` field in response "
+        "indicates the total items in this particular category."
     ),
-    response_description="List of meals in the category",
+    response_description="Paginated list of meals in the category",
     responses={
         404: {
             "model": HTTPError,
@@ -65,10 +71,14 @@ async def create_meal(
     }
 )
 async def get_meals(
-    category_id: int, service: IMealService = Depends(get_meal_service)
+    category_id: int,
+    pagination_params: PaginationParams = Depends(PaginationParams),
+    service: IMealService = Depends(get_meal_service)
 ):
     try:
-        return await service.get_meals_by_category_id(category_id)
+        return await service.get_meals_by_category_id(
+            category_id, pagination_params
+        )
     except MealCategoryNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)

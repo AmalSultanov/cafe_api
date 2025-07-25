@@ -11,7 +11,7 @@ class IMealRepository(Protocol):
         ...
 
     async def get_all_by_category_id(
-        self, category_id: int
+        self, category_id: int, limit: int, offset: int
     ) -> list[MealModel]:
         ...
 
@@ -19,6 +19,9 @@ class IMealRepository(Protocol):
         ...
 
     async def get_by_name(self, meal_name: str) -> MealModel | None:
+        ...
+
+    async def get_total_count(self, category_id: int) -> int:
         ...
 
     async def update(

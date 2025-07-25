@@ -6,7 +6,10 @@ from src.exceptions.meal import (
 )
 from src.exceptions.meal_category import MealCategoryNotFoundError
 from src.repositories.meal.interface import IMealRepository
-from src.schemas.meal import MealCreate, MealUpdate, MealPutUpdate, MealRead
+from src.schemas.common import PaginationParams
+from src.schemas.meal import (
+    MealCreate, MealUpdate, MealPutUpdate, MealRead, PaginatedMealResponse
+)
 from src.services.meal_category.interface import IMealCategoryService
 
 
@@ -41,13 +44,26 @@ class MealService:
         return MealRead.model_validate(meal)
 
     async def get_meals_by_category_id(
-        self, category_id: int
-    ) -> list[MealRead]:
+        self, category_id: int, pagination_params: PaginationParams
+    ) -> PaginatedMealResponse:
         if not await self.category_service.get_category(category_id):
             raise MealCategoryNotFoundError(category_id)
 
-        meals = await self.repository.get_all_by_category_id(category_id)
-        return [MealRead.model_validate(meal) for meal in meals]
+        offset = (pagination_params.page - 1) * pagination_params.per_page
+        meals = await self.repository.get_all_by_category_id(
+            category_id, pagination_params.per_page, offset
+        )
+        total = await self.repository.get_total_count(category_id)
+        total_pages = (
+            (total + pagination_params.per_page - 1) // pagination_params.per_page
+        )
+
+        return PaginatedMealResponse(
+            total=total,
+            page=pagination_params.page,
+            total_pages=total_pages,
+            items=[MealRead.model_validate(meal) for meal in meals]
+        )
 
     async def get_meal(
         self, meal_id: int, category_id: int = None

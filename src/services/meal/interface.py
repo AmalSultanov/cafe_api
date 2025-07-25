@@ -1,3 +1,4 @@
+from src.schemas.common import PaginationParams
 from src.schemas.meal import MealCreate, MealUpdate, MealPutUpdate, MealRead
 
 
@@ -8,7 +9,7 @@ class IMealService:
         ...
 
     async def get_meals_by_category_id(
-        self, category_id: int
+        self, category_id: int, pagination_params: PaginationParams
     ) -> list[MealRead]:
         ...
 

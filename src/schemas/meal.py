@@ -3,6 +3,8 @@ from decimal import Decimal
 
 from pydantic import BaseModel, HttpUrl, Field, ConfigDict
 
+from src.schemas.common import PaginatedBaseResponse
+
 
 class MealBase(BaseModel):
     image_url: HttpUrl | None = None
@@ -19,13 +21,6 @@ class MealCreate(MealBase):
     pass
 
 
-class MealRead(MealBase):
-    id: int
-    category_id: int
-    created_at: datetime
-    model_config = {"from_attributes": True}
-
-
 class MealPutUpdate(MealBase):
     pass
 
@@ -35,3 +30,14 @@ class MealUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
     unit_price: Decimal | None = Field(default=None, gt=0)
+
+
+class MealRead(MealBase):
+    id: int
+    category_id: int
+    created_at: datetime
+    model_config = {"from_attributes": True}
+
+
+class PaginatedMealResponse(PaginatedBaseResponse):
+    items: list[MealRead]
