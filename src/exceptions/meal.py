@@ -14,3 +14,8 @@ class MealNotFoundError(NotFoundError):
 class NoMealUpdateDataError(ValidationError):
     def __init__(self):
         super().__init__("No data provided for update")
+
+
+class MealPriceError(ValidationError):
+    def __init__(self):
+        super().__init__("Unit price must be greater than 0")
