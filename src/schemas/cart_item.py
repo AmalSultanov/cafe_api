@@ -29,10 +29,10 @@ class CartItemPatchUpdate(BaseModel):
 
     @field_validator("quantity")
     @classmethod
-    def validate_quantity(cls, v):
-        if v is not None and v <= 0:
+    def validate_quantity(cls, value: int):
+        if value is not None and value <= 0:
             raise CartItemQuantityError()
-        return v
+        return value
 
 
 class CartItemRead(CartItemBase):
