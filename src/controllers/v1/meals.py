@@ -25,13 +25,13 @@ router = APIRouter(prefix="/meal-categories", tags=["Meals"])
     ),
     response_description="Details of the newly created meal",
     responses={
-        400: {
-            "model": HTTPError,
-            "description": "Meal with the given name already exists"
-        },
         404: {
             "model": HTTPError,
             "description": "Meal category not found"
+        },
+        409: {
+            "model": HTTPError,
+            "description": "Meal with the given name already exists"
         },
         422: {"description": "Invalid input format or missing fields"}
     }
@@ -49,7 +49,7 @@ async def create_meal(
         )
     except MealAlreadyExistsError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+            status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
 
 
@@ -127,13 +127,15 @@ async def get_meal(
     responses={
         400: {
             "model": HTTPError,
-            "description": (
-                "No meal data to update or provided name already exists"
-            )
+            "description": "No meal data to update"
         },
         404: {
             "model": HTTPError,
             "description": "Meal or category not found"
+        },
+        409: {
+            "model": HTTPError,
+            "description": "Provided meal name already exists"
         },
         422: {"description": "Invalid request format"}
     }
@@ -160,7 +162,7 @@ async def update_meal(
         )
     except MealAlreadyExistsError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+            status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
 
 
@@ -175,13 +177,15 @@ async def update_meal(
     responses={
         400: {
             "model": HTTPError,
-            "description": (
-                "No meal data to update or provided name already exists"
-            )
+            "description": "No meal data to update"
         },
         404: {
             "model": HTTPError,
             "description": "Meal or category not found"
+        },
+        409: {
+            "model": HTTPError,
+            "description": "Provided meal name already exists"
         }
     }
 )
@@ -207,7 +211,7 @@ async def partial_update_meal(
         )
     except MealAlreadyExistsError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+            status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
 
 
