@@ -16,7 +16,7 @@ router = APIRouter(prefix="/users", tags=["User Cart"])
     description="Create a new cart for the specified user.",
     response_description="Details of the newly created cart",
     responses={
-        400: {
+        409: {
             "model": HTTPError,
             "description": "A cart already exists for this user"
         }
@@ -30,7 +30,7 @@ async def create_cart(
         return await service.create_cart(user_id)
     except CartAlreadyExistsError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+            status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
 
 
