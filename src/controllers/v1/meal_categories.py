@@ -23,7 +23,7 @@ router = APIRouter(prefix="/meal-categories", tags=["Meal Categories"])
     description="Create a new meal category with a unique name.",
     response_description="Details of the created meal category",
     responses={
-        400: {
+        409: {
             "model": HTTPError,
             "description": "Meal category already exists"
         },
@@ -38,7 +38,7 @@ async def create_category(
         return await service.create_category(category_data)
     except MealCategoryAlreadyExistsError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+            status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
 
 
@@ -90,7 +90,11 @@ async def get_category(
     responses={
         400: {
             "model": HTTPError,
-            "description": "No update data or category name already exists"
+            "description": "No update data"
+        },
+        409: {
+            "model": HTTPError,
+            "description": "Meal category name already exists"
         },
         404: {
             "model": HTTPError,
@@ -115,7 +119,7 @@ async def update_category(
         )
     except MealCategoryAlreadyExistsError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+            status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
 
 
