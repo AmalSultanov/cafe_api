@@ -8,7 +8,7 @@ from src.exceptions.meal_category import MealCategoryNotFoundError
 from src.repositories.meal.interface import IMealRepository
 from src.schemas.common import PaginationParams
 from src.schemas.meal import (
-    MealCreate, MealUpdate, MealPutUpdate, MealRead, PaginatedMealResponse
+    MealCreate, MealPatchUpdate, MealPutUpdate, MealRead, PaginatedMealResponse
 )
 from src.services.meal_category.interface import IMealCategoryService
 
@@ -84,7 +84,7 @@ class MealService:
         self,
         category_id: int,
         meal_id: int,
-        meal_data: MealPutUpdate | MealUpdate,
+        meal_data: MealPutUpdate | MealPatchUpdate,
         is_partial: bool = False
     ) -> MealRead:
         new_data = (
@@ -102,8 +102,8 @@ class MealService:
         if not meal or meal.category_id != category_id:
             raise MealNotFoundError(meal_id)
 
-        if hasattr(meal_data, "image_url") and meal_data.image_url is not None:
-            meal_data.image_url = url_to_str(meal_data.image_url)
+        if "image_url" in new_data and new_data["image_url"] is not None:
+            new_data["image_url"] = url_to_str(new_data["image_url"])
 
         if "name" in new_data:
             existing = await self.repository.get_by_name(new_data["name"])

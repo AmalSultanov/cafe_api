@@ -1,6 +1,6 @@
 from src.schemas.common import PaginationParams
 from src.schemas.meal import (
-    MealCreate, MealUpdate, MealPutUpdate, MealRead, PaginatedMealResponse
+    MealCreate, MealPatchUpdate, MealPutUpdate, MealRead, PaginatedMealResponse
 )
 
 
@@ -24,7 +24,7 @@ class IMealService:
         self,
         category_id: int,
         meal_id: int,
-        meal_data: MealPutUpdate | MealUpdate,
+        meal_data: MealPutUpdate | MealPatchUpdate,
         is_partial: bool = False,
     ) -> MealRead:
         ...
