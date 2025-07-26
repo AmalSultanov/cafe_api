@@ -1,6 +1,7 @@
 from src.exceptions.cart import CartAlreadyExistsError
 from src.exceptions.user import (
-    UserAlreadyExistsError, UserIdentityAlreadyExistsError
+    UserAlreadyExistsError, UserIdentityAlreadyExistsError,
+    UserPhoneAlreadyExistsError
 )
 from src.schemas.user import UserRegister, UserRead
 from src.services.cart.interface import ICartService
@@ -22,6 +23,8 @@ class UserRegistrationService:
             user_cart = await self.cart_service.create_cart(user.id)
             return UserRead.model_validate(user)
         except UserAlreadyExistsError:
+            raise
+        except UserPhoneAlreadyExistsError:
             raise
         except UserIdentityAlreadyExistsError:
             raise
