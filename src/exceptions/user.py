@@ -37,3 +37,8 @@ class UserIdentityNotFoundError(NotFoundError):
         super().__init__(
             f"User with provider ID={provider_id} from {provider} was not found"
         )
+
+
+class UserPhoneError(ValidationError):
+    def __init__(self):
+        super().__init__("Phone number must contain only digits")
