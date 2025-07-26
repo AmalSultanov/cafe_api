@@ -20,10 +20,6 @@ class CartItemCreate(CartItemBase):
         return value
 
 
-class CartItemPutUpdate(BaseModel):
-    quantity: int
-
-
 class CartItemPatchUpdate(BaseModel):
     quantity: int | None = None
 
