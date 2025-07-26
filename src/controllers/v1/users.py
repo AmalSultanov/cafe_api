@@ -7,7 +7,7 @@ from src.exceptions.cart import CartAlreadyExistsError
 from src.exceptions.user import (
     UserNotFoundError, UserIdentityNotFoundError, UserAlreadyExistsError,
     UserPhoneAlreadyExistsError, NoUserUpdateDataError,
-    UserIdentityAlreadyExistsError
+    UserIdentityAlreadyExistsError, UserPhoneError
 )
 from src.schemas.common import PaginationParams
 from src.schemas.http_error import HTTPError
@@ -34,9 +34,13 @@ router = APIRouter(prefix="/users", tags=["Users"])
     responses={
         400: {
             "model": HTTPError,
+            "description": "User phone number does not consist of all numbers"
+        },
+        409: {
+            "model": HTTPError,
             "description": (
                 "User already exists, identity already exists, "
-                "or cart was already created."
+                "user phone number exists, or cart was already created"
             )
         },
         422: {"description": "Invalid input format or missing fields"}
@@ -48,17 +52,25 @@ async def register(
 ):
     try:
         return await service.register_user(user_data)
-    except UserAlreadyExistsError as e:
+    except UserPhoneError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        )
+    except UserAlreadyExistsError as e:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(e)
+        )
+    except UserPhoneAlreadyExistsError as e:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
     except UserIdentityAlreadyExistsError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+            status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
     except CartAlreadyExistsError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+            status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
 
 
@@ -72,7 +84,7 @@ async def register(
     responses={
         404: {
             "model": HTTPError,
-            "description": "User not found with the provided phone number."
+            "description": "User not found with the provided phone number"
         }
     }
 )
@@ -169,11 +181,15 @@ async def get_user(
     responses={
         400: {
             "model": HTTPError,
-            "description": "Phone number already exists"
+            "description": "Phone number should contain only numbers"
         },
         404: {
             "model": HTTPError,
             "description": "User not found"
+        },
+        409: {
+            "model": HTTPError,
+            "description": "Phone number already exists"
         },
         422: {"description": "Invalid input format or missing fields"}
     }
@@ -185,13 +201,17 @@ async def update_user(
 ):
     try:
         return await service.update_user(user_id, user_data)
+    except UserPhoneError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        )
     except UserNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
     except UserPhoneAlreadyExistsError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+            status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
 
 
@@ -206,11 +226,18 @@ async def update_user(
     responses={
         400: {
             "model": HTTPError,
-            "description": "No fields to update or phone number already exists"
+            "description": (
+                "No fields to update or "
+                "phone number does not consist of all numbers"
+            )
         },
         404: {
             "model": HTTPError,
             "description": "User not found"
+        },
+        409: {
+            "model": HTTPError,
+            "description": "Phone number already exists"
         },
         422: {"description": "Invalid input format or missing fields"}
     }
@@ -222,6 +249,10 @@ async def partial_update_user(
 ):
     try:
         return await service.update_user(user_id, user_data, True)
+    except UserPhoneError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        )
     except NoUserUpdateDataError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
@@ -232,7 +263,7 @@ async def partial_update_user(
         )
     except UserPhoneAlreadyExistsError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+            status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
 
 
