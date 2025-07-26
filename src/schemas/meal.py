@@ -1,8 +1,9 @@
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, HttpUrl, Field, ConfigDict
+from pydantic import BaseModel, HttpUrl, ConfigDict, field_validator
 
+from src.exceptions.meal import MealPriceError
 from src.schemas.common import PaginatedBaseResponse
 
 
@@ -16,6 +17,13 @@ class MealBase(BaseModel):
         Decimal: lambda v: format(v, "f")
     })
 
+    @field_validator("unit_price")
+    @classmethod
+    def validate_unit_price(cls, value: Decimal):
+        if value <= 0:
+            raise MealPriceError()
+        return value
+
 
 class MealCreate(MealBase):
     pass
@@ -25,11 +33,18 @@ class MealPutUpdate(MealBase):
     pass
 
 
-class MealUpdate(BaseModel):
+class MealPatchUpdate(BaseModel):
     image_url: HttpUrl | None = None
     name: str | None = None
     description: str | None = None
-    unit_price: Decimal | None = Field(default=None, gt=0)
+    unit_price: Decimal | None = None
+
+    @field_validator("unit_price")
+    @classmethod
+    def validate_unit_price(cls, value: Decimal | None):
+        if value is not None and value <= 0:
+            raise MealPriceError()
+        return value
 
 
 class MealRead(MealBase):
