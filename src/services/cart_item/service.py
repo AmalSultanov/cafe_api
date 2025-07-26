@@ -5,7 +5,7 @@ from src.exceptions.cart_item import (
 from src.models.cart_item import CartItemModel
 from src.repositories.cart_item.interface import ICartItemRepository
 from src.schemas.cart_item import (
-    CartItemCreate, CartItemPatchUpdate, CartItemRead, CartItemPutUpdate
+    CartItemCreate, CartItemPatchUpdate, CartItemRead
 )
 from src.services.cart.interface import ICartService
 from src.services.meal.interface import IMealService
@@ -87,13 +87,9 @@ class CartItemService:
         self,
         user_id: int,
         item_id: int,
-        item_data: CartItemPutUpdate | CartItemPatchUpdate,
-        is_partial: bool = False
+        item_data: CartItemPatchUpdate
     ) -> CartItemRead:
-        new_data = (
-            item_data.model_dump(exclude_unset=True) if is_partial
-            else item_data.model_dump()
-        )
+        new_data = item_data.model_dump(exclude_unset=True)
 
         if not new_data:
             raise NoCartItemUpdateDataError()

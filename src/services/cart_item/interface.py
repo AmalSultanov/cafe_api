@@ -1,7 +1,7 @@
 from typing import Protocol
 
 from src.schemas.cart_item import (
-    CartItemCreate, CartItemPatchUpdate, CartItemRead, CartItemPutUpdate
+    CartItemCreate, CartItemPatchUpdate, CartItemRead
 )
 
 
@@ -23,8 +23,7 @@ class ICartItemService(Protocol):
         self,
         user_id: int,
         item_id: int,
-        item_data: CartItemPutUpdate | CartItemPatchUpdate,
-        is_partial: bool = False
+        item_data: CartItemPatchUpdate
     ) -> CartItemRead:
         ...
 
