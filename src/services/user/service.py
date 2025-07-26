@@ -38,11 +38,9 @@ class UserService:
                 exclude={"provider", "provider_id", "username"}
             ))
         except IntegrityError:
-            raise UserAlreadyExistsError(
-                user_data.username, user_data.provider
-            )
+            raise UserPhoneAlreadyExistsError(user_data.phone_number)
 
-        new_identity = IdentityCreate.model_validate(user_data)
+        new_identity = IdentityCreate(**user_data.model_dump())
 
         try:
             await self.identity_service.create_identity(user.id, new_identity)
