@@ -2,13 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.core.dependencies.meal import get_meal_service
 from src.exceptions.meal import (
-    MealNotFoundError, MealAlreadyExistsError, NoMealUpdateDataError
+    MealNotFoundError, MealAlreadyExistsError, NoMealUpdateDataError,
+    MealPriceError
 )
 from src.exceptions.meal_category import MealCategoryNotFoundError
 from src.schemas.common import PaginationParams
 from src.schemas.http_error import HTTPError
 from src.schemas.meal import (
-    MealRead, MealCreate, MealUpdate, MealPutUpdate, PaginatedMealResponse
+    MealRead, MealCreate, MealPatchUpdate, MealPutUpdate, PaginatedMealResponse
 )
 from src.services.meal.interface import IMealService
 
@@ -25,6 +26,10 @@ router = APIRouter(prefix="/meal-categories", tags=["Meals"])
     ),
     response_description="Details of the newly created meal",
     responses={
+        400: {
+            "model": HTTPError,
+            "description": "Unit price must be greater than 0"
+        },
         404: {
             "model": HTTPError,
             "description": "Meal category not found"
@@ -43,6 +48,10 @@ async def create_meal(
 ):
     try:
         return await service.create_meal(category_id, meal_data)
+    except MealPriceError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        )
     except MealCategoryNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
@@ -127,7 +136,9 @@ async def get_meal(
     responses={
         400: {
             "model": HTTPError,
-            "description": "No meal data to update"
+            "description": (
+                "No meal data to update or unit price is not greater than 0"
+            )
         },
         404: {
             "model": HTTPError,
@@ -148,6 +159,10 @@ async def update_meal(
 ):
     try:
         return await service.update_meal(category_id, meal_id, meal_data)
+    except MealPriceError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        )
     except NoMealUpdateDataError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
@@ -177,7 +192,9 @@ async def update_meal(
     responses={
         400: {
             "model": HTTPError,
-            "description": "No meal data to update"
+            "description": (
+                "No meal data to update or unit price is not greater than 0"
+            )
         },
         404: {
             "model": HTTPError,
@@ -192,11 +209,15 @@ async def update_meal(
 async def partial_update_meal(
     category_id: int,
     meal_id: int,
-    meal_data: MealUpdate,
+    meal_data: MealPatchUpdate,
     service: IMealService = Depends(get_meal_service)
 ):
     try:
         return await service.update_meal(category_id, meal_id, meal_data, True)
+    except MealPriceError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        )
     except NoMealUpdateDataError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
