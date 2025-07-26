@@ -67,7 +67,7 @@ async def add_item_to_cart(
 )
 async def get_cart_items(
     user_id: int,
-    service: ICartItemService = Depends(get_cart_item_service),
+    service: ICartItemService = Depends(get_cart_item_service)
 ):
     try:
         return await service.get_cart_items(user_id)
@@ -92,7 +92,7 @@ async def get_cart_items(
 async def get_cart_item(
     user_id: int,
     item_id: int,
-    service: ICartItemService = Depends(get_cart_item_service),
+    service: ICartItemService = Depends(get_cart_item_service)
 ):
     try:
         return await service.get_cart_item(user_id, item_id)
@@ -130,12 +130,10 @@ async def update_cart_item(
     user_id: int,
     item_id: int,
     item_data: CartItemPatchUpdate,
-    service: ICartItemService = Depends(get_cart_item_service),
+    service: ICartItemService = Depends(get_cart_item_service)
 ):
     try:
-        return await service.update_cart_item(
-            user_id, item_id, item_data, True
-        )
+        return await service.update_cart_item(user_id, item_id, item_data)
     except NoCartItemUpdateDataError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
@@ -169,7 +167,7 @@ async def update_cart_item(
 async def delete_cart_item(
     user_id: int,
     item_id: int,
-    service: ICartItemService = Depends(get_cart_item_service),
+    service: ICartItemService = Depends(get_cart_item_service)
 ):
     try:
         await service.remove_item_from_cart(user_id, item_id)
@@ -197,7 +195,7 @@ async def delete_cart_item(
 )
 async def delete_cart_items(
     user_id: int,
-    service: ICartItemService = Depends(get_cart_item_service),
+    service: ICartItemService = Depends(get_cart_item_service)
 ):
     try:
         await service.remove_items_from_cart(user_id)
