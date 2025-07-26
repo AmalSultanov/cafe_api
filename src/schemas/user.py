@@ -1,8 +1,9 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
+from src.exceptions.user import UserPhoneError
 from src.schemas.common import PaginatedBaseResponse
 
 
@@ -42,6 +43,13 @@ class UserBase(BaseModel):
     surname: str | None
     phone_number: str
 
+    @field_validator("phone_number")
+    @classmethod
+    def validate_phone_number(cls, phone_number: str) -> str:
+        if not phone_number.isdigit():
+            raise UserPhoneError()
+        return phone_number
+
 
 class UserRegister(UserBase, IdentityBase):
     pass
@@ -52,8 +60,17 @@ class UserPutUpdate(UserBase):
     surname: str
 
 
-class UserPatchUpdate(UserBase):
-    phone_number: str | None
+class UserPatchUpdate(BaseModel):
+    name: str | None = None
+    surname: str | None = None
+    phone_number: str | None = None
+
+    @field_validator("phone_number")
+    @classmethod
+    def validate_phone_number(cls, phone_number: str) -> str:
+        if not phone_number.isdigit():
+            raise UserPhoneError()
+        return phone_number
 
 
 class UserRead(UserBase):
