@@ -19,7 +19,7 @@ class CartModel(Base):
         ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False
     )
     total_price: Mapped[Decimal] = mapped_column(
-        Numeric(10, 2), nullable=True
+        Numeric(10, 2), nullable=False, default=Decimal("0.00")
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow
