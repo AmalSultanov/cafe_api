@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Integer, String
+from sqlalchemy import Integer, String, DateTime
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from src.core.database import Base
@@ -15,7 +15,9 @@ class MealCategoryModel(Base):
         Integer, primary_key=True, autoincrement=True
     )
     name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow
+    )
 
     meals: Mapped["MealModel"] = relationship(
         "MealModel", back_populates="category"
