@@ -6,6 +6,7 @@ from src.exceptions.cart_item import (
     CartItemNotFoundError, CartItemsNotFoundError, NoCartItemUpdateDataError,
     CartItemQuantityError
 )
+from src.exceptions.meal import MealNotFoundError
 from src.schemas.cart_item import (
     CartItemRead, CartItemCreate, CartItemPatchUpdate
 )
@@ -31,7 +32,9 @@ router = APIRouter(prefix="/users", tags=["Cart Items"])
         },
         404: {
             "model": HTTPError,
-            "description": "Cart not found for the given user"
+            "description": (
+                "Cart not found for the given user or meal not found"
+            )
         },
         422: {"description": "Invalid input format or missing fields"}
     }
@@ -50,6 +53,10 @@ async def add_item_to_cart(
     except CartItemQuantityError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        )
+    except MealNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
 
 
