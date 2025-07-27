@@ -38,6 +38,7 @@ class CartItemRead(CartItemBase):
     total_price: Decimal
     created_at: datetime
 
-    model_config = ConfigDict(json_encoders={
-        Decimal: lambda v: format(v, "f")
-    })
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_encoders={Decimal: lambda v: format(v, "f")}
+    )
