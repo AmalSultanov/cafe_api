@@ -1,6 +1,7 @@
 from datetime import datetime
+from decimal import Decimal
 
-from sqlalchemy import ForeignKey, Integer
+from sqlalchemy import ForeignKey, Integer, DateTime, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.database import Base
@@ -17,7 +18,12 @@ class CartModel(Base):
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False
     )
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    total_price: Mapped[Decimal] = mapped_column(
+        Numeric(10, 2), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow
+    )
 
     user: Mapped["UserModel"] = relationship(
         "UserModel", back_populates="cart", lazy="joined"
