@@ -29,6 +29,8 @@ from src.models.user import UserModel
 from src.models.user import UserIdentityModel
 from src.models.cart import CartModel
 from src.models.cart_item import CartItemModel
+from src.models.order import OrderModel
+from src.models.order_item import OrderItemRead
 
 target_metadata = Base.metadata
 # target_metadata = None
