@@ -70,11 +70,7 @@ class UserIdentityModel(Base):
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     provider: Mapped[IdentityProviderEnum] = mapped_column(
-        Enum(
-            IdentityProviderEnum,
-            name="identityproviderenum",
-            create_type=False
-        )
+        Enum(IdentityProviderEnum, name="identity_provider_enum")
     )
     provider_id: Mapped[str] = mapped_column(String, nullable=False)
     username: Mapped[str | None] = mapped_column(String, nullable=False)
