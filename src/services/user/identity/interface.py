@@ -16,3 +16,6 @@ class IUserIdentityService(Protocol):
 
     async def identity_exists(self, identity_data: IdentityCheck) -> bool:
         ...
+
+    async def username_exists(self, identity_data: IdentityCheck) -> bool:
+        ...

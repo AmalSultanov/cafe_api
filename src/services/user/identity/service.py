@@ -20,7 +20,7 @@ class UserIdentityService:
             identity = await self.repository.create(user_id, identity_dict)
         except IntegrityError:
             raise UserIdentityAlreadyExistsError(
-                identity_dict["provider_id"], identity_dict["provider"]
+                identity_dict["username"], identity_dict["provider"]
             )
 
         return IdentityRead.model_validate(identity)
@@ -38,6 +38,13 @@ class UserIdentityService:
     async def identity_exists(self, identity_data: IdentityCheck) -> bool:
         return (
             await self.repository.get_by_provider(
+                identity_data.model_dump()
+            ) is not None
+        )
+
+    async def username_exists(self, identity_data: IdentityCheck) -> bool:
+        return (
+            await self.repository.get_by_provider_and_username(
                 identity_data.model_dump()
             ) is not None
         )
