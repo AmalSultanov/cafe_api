@@ -21,6 +21,7 @@ class IdentityBase(BaseModel):
 class IdentityCheck(BaseModel):
     provider: ProviderEnum
     provider_id: str
+    username: str | None = None
 
 
 class IdentityCreate(IdentityBase):
