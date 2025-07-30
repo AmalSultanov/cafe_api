@@ -1,13 +1,6 @@
 from src.exceptions.base import ConflictError, NotFoundError, ValidationError
 
 
-class UserAlreadyExistsError(ConflictError):
-    def __init__(self, username: str, provider: str):
-        super().__init__(
-            f"User with username '{username}' from {provider} already exists"
-        )
-
-
 class UserPhoneAlreadyExistsError(ConflictError):
     def __init__(self, phone_number: str):
         super().__init__(
@@ -26,6 +19,13 @@ class NoUserUpdateDataError(ValidationError):
 
 
 class UserIdentityAlreadyExistsError(ConflictError):
+    def __init__(self, username: str, provider: str):
+        super().__init__(
+            f"User with username '{username}' from {provider} already exists"
+        )
+
+
+class UserProviderIdAlreadyExistsError(ConflictError):
     def __init__(self, provider_id: str, provider: str):
         super().__init__(
             f"User with provider ID={provider_id} from {provider} already exists"
