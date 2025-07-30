@@ -73,7 +73,7 @@ class UserIdentityModel(Base):
         Enum(IdentityProviderEnum, name="identity_provider_enum")
     )
     provider_id: Mapped[str] = mapped_column(String, nullable=False)
-    username: Mapped[str | None] = mapped_column(String, nullable=False)
+    username: Mapped[str] = mapped_column(String, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow
     )
