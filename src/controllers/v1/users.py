@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.core.dependencies.user import (
-    get_user_registration_service, get_user_service, get_user_identity_service
+    get_user_service, get_user_identity_service
 )
 from src.exceptions.cart import CartAlreadyExistsError
 from src.exceptions.user import (
-    UserNotFoundError, UserIdentityNotFoundError, UserAlreadyExistsError,
-    UserPhoneAlreadyExistsError, NoUserUpdateDataError,
-    UserIdentityAlreadyExistsError, UserPhoneError
+    UserNotFoundError, UserIdentityNotFoundError, UserPhoneAlreadyExistsError,
+    NoUserUpdateDataError, UserIdentityAlreadyExistsError, UserPhoneError,
+    UserProviderIdAlreadyExistsError
 )
 from src.schemas.common import PaginationParams
 from src.schemas.http_error import HTTPError
@@ -17,7 +17,6 @@ from src.schemas.user import (
 )
 from src.services.user.identity.interface import IUserIdentityService
 from src.services.user.interface import IUserService
-from src.services.user.registration.interface import IUserRegistrationService
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -39,8 +38,8 @@ router = APIRouter(prefix="/users", tags=["Users"])
         409: {
             "model": HTTPError,
             "description": (
-                "User already exists, identity already exists, "
-                "user phone number exists, or cart was already created"
+                "User already exists, user phone number exists, "
+                "or cart was already created"
             )
         },
         422: {"description": "Invalid input format or missing fields"}
@@ -48,23 +47,23 @@ router = APIRouter(prefix="/users", tags=["Users"])
 )
 async def register(
     user_data: UserRegister,
-    service: IUserRegistrationService = Depends(get_user_registration_service)
+    service: IUserService = Depends(get_user_service)
 ):
     try:
-        return await service.register_user(user_data)
+        return await service.create_user(user_data)
+    except UserProviderIdAlreadyExistsError as e:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(e)
+        )
     except UserPhoneError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
         )
-    except UserAlreadyExistsError as e:
+    except UserIdentityAlreadyExistsError as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
     except UserPhoneAlreadyExistsError as e:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail=str(e)
-        )
-    except UserIdentityAlreadyExistsError as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
