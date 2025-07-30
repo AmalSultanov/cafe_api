@@ -39,3 +39,15 @@ class UserIdentityRepository:
             )
         )
         return result.scalar_one_or_none()
+
+    async def get_by_provider_and_username(
+        self, identity_data: dict[str, str]
+    ) -> UserIdentityModel | None:
+        result = await self.db.execute(
+            select(UserIdentityModel)
+            .where(
+                UserIdentityModel.provider == identity_data["provider"],
+                UserIdentityModel.username == identity_data["username"]
+            )
+        )
+        return result.scalar_one_or_none()

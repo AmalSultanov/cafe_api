@@ -13,3 +13,8 @@ class IUserIdentityRepository(Protocol):
         self, identity_data: dict[str, str]
     ) -> UserIdentityModel | None:
         ...
+
+    async def get_by_provider_and_username(
+        self, identity_data: dict[str, str]
+    ) -> UserIdentityModel | None:
+        ...
