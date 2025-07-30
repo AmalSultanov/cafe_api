@@ -55,7 +55,7 @@ class CartItemRepository:
         return result.scalar_one_or_none()
 
     async def update(
-        self, item_id: int, cart_data: dict[str, int]
+        self, item_id: int, cart_data: dict[str, int | str]
     ) -> CartItemModel:
         await self.db.execute(
             update(CartItemModel)

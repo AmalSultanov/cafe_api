@@ -24,7 +24,7 @@ class ICartItemRepository(Protocol):
         ...
 
     async def update(
-        self, item_id: int, cart_data: dict[str, int]
+        self, item_id: int, cart_data: dict[str, int | str]
     ) -> CartItemModel:
         ...
 
