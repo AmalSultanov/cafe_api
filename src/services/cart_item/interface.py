@@ -14,9 +14,7 @@ class ICartItemService(Protocol):
     async def get_cart_items(self, user_id: int) -> list[CartItemRead]:
         ...
 
-    async def get_cart_item(
-        self, user_id: int, item_id: int
-    ) -> CartItemRead | None:
+    async def get_cart_item(self, user_id: int, item_id: int) -> CartItemRead:
         ...
 
     async def update_cart_item(
