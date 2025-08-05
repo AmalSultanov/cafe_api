@@ -82,3 +82,9 @@ class UserRead(UserBase):
 
 class PaginatedUserResponse(PaginatedBaseResponse):
     items: list[UserRead]
+
+
+class UserWithTokens(BaseModel):
+    user: UserRead
+    access_token: str
+    refresh_token: str

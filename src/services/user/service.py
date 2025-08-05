@@ -1,16 +1,21 @@
 from sqlalchemy.exc import IntegrityError
 
 from src.exceptions.user import (
-    UserAlreadyExistsError, UserNotFoundError, UserPhoneAlreadyExistsError,
-    NoUserUpdateDataError, UserIdentityAlreadyExistsError
+    UserNotFoundError, UserPhoneAlreadyExistsError, NoUserUpdateDataError,
+    UserIdentityAlreadyExistsError, UserProviderIdAlreadyExistsError
 )
+from src.message_broker.config import broker
+from src.message_broker.events.user import UserCreatedEvent
+from src.message_broker.publisher import EventPublisher
+from src.message_broker.topics import TOPIC_USER_CREATED
 from src.repositories.user.interface import IUserRepository
 from src.schemas.common import PaginationParams
 from src.schemas.user import (
     UserRegister, UserPutUpdate, UserPatchUpdate, UserRead, IdentityCheck,
-    IdentityCreate, PaginatedUserResponse
+    IdentityCreate, PaginatedUserResponse, ProviderEnum, UserWithTokens
 )
 from src.services.user.identity.interface import IUserIdentityService
+from src.core.utils.jwt import create_access_token, create_refresh_token
 
 
 class UserService:
@@ -22,14 +27,22 @@ class UserService:
         self.repository = repository
         self.identity_service = identity_service
 
-    async def create_user(self, user_data: UserRegister) -> UserRead:
+    async def create_user(
+        self, user_data: UserRegister
+    ) -> UserRead | UserWithTokens:
         identity_check = IdentityCheck(
             provider=user_data.provider,
-            provider_id=user_data.provider_id
+            provider_id=user_data.provider_id,
+            username=user_data.username
         )
 
         if await self.identity_service.identity_exists(identity_check):
-            raise UserAlreadyExistsError(
+            raise UserProviderIdAlreadyExistsError(
+                user_data.provider_id, user_data.provider
+            )
+
+        if await self.identity_service.username_exists(identity_check):
+            raise UserIdentityAlreadyExistsError(
                 user_data.username, user_data.provider
             )
 
@@ -46,6 +59,21 @@ class UserService:
             await self.identity_service.create_identity(user.id, new_identity)
         except UserIdentityAlreadyExistsError:
             raise
+
+        event = UserCreatedEvent(user_id=user.id)
+        publisher = EventPublisher(broker)
+
+        await publisher.publish(TOPIC_USER_CREATED, event.model_dump())
+
+        if user_data.provider == ProviderEnum.web:
+            access_token = create_access_token(user.id)
+            refresh_token = create_refresh_token(user.id)
+
+            return UserWithTokens(
+                user=UserRead.model_validate(user),
+                access_token=access_token,
+                refresh_token=refresh_token
+            )
         return UserRead.model_validate(user)
 
     async def log_in_user(self, phone_number: str):

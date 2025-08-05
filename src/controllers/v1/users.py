@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 
+from src.core.config import Settings, get_settings
 from src.core.dependencies.user import (
     get_user_service, get_user_identity_service
 )
@@ -13,7 +14,7 @@ from src.schemas.common import PaginationParams
 from src.schemas.http_error import HTTPError
 from src.schemas.user import (
     UserRegister, UserRead, IdentityCheck, UserPutUpdate, UserPatchUpdate,
-    IdentityRead, IdentityStatusResponse, PaginatedUserResponse
+    IdentityRead, IdentityStatusResponse, PaginatedUserResponse, UserWithTokens
 )
 from src.services.user.identity.interface import IUserIdentityService
 from src.services.user.interface import IUserService
@@ -23,11 +24,14 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.post(
     "/register",
-    response_model=UserRead,
+    response_model=UserRead | UserWithTokens,
     status_code=status.HTTP_201_CREATED,
     description=(
-        "Register a new user with the given information. "
-        "An empty cart is automatically created for this user."
+        "Create a new user account with the provided registration data. If "
+        "the request comes from a web client, access and refresh JWT tokens "
+        "will be generated and returned. Otherwise, only user information is "
+        "returned. An empty cart is also created for the new user as part of "
+        "the registration process."
     ),
     response_description="Details of the newly registered user",
     responses={
@@ -47,29 +51,36 @@ router = APIRouter(prefix="/users", tags=["Users"])
 )
 async def register(
     user_data: UserRegister,
-    service: IUserService = Depends(get_user_service)
+    response: Response,
+    service: IUserService = Depends(get_user_service),
+    settings: Settings = Depends(get_settings)
 ):
     try:
-        return await service.create_user(user_data)
-    except UserProviderIdAlreadyExistsError as e:
+        result = await service.create_user(user_data)
+
+        if isinstance(result, UserWithTokens):
+            response.set_cookie(
+                key="access_token", value=result.access_token,
+                max_age=settings.access_token_max_age, secure=True,
+                httponly=True, samesite="Lax"
+            )
+            response.set_cookie(
+                key="refresh_token", value=result.refresh_token,
+                max_age=settings.refresh_token_max_age, secure=True,
+                httponly=True, samesite="Lax"
+            )
+
+        return result
+    except (
+        UserProviderIdAlreadyExistsError, UserIdentityAlreadyExistsError,
+        UserPhoneAlreadyExistsError, CartAlreadyExistsError
+    ) as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
     except UserPhoneError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
-        )
-    except UserIdentityAlreadyExistsError as e:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail=str(e)
-        )
-    except UserPhoneAlreadyExistsError as e:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail=str(e)
-        )
-    except CartAlreadyExistsError as e:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
 
 
@@ -248,11 +259,7 @@ async def partial_update_user(
 ):
     try:
         return await service.update_user(user_id, user_data, True)
-    except UserPhoneError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
-        )
-    except NoUserUpdateDataError as e:
+    except (UserPhoneError, NoUserUpdateDataError) as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
         )
