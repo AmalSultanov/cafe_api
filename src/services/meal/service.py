@@ -1,6 +1,6 @@
 from sqlalchemy.exc import IntegrityError
 
-from src.core.utils import url_to_str
+from src.core.utils.type_converters import url_to_str
 from src.exceptions.meal import (
     MealNotFoundError, MealAlreadyExistsError, NoMealUpdateDataError
 )
