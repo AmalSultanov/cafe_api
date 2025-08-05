@@ -61,12 +61,12 @@ async def register(
         if isinstance(result, UserWithTokens):
             response.set_cookie(
                 key="access_token", value=result.access_token,
-                max_age=settings.access_token_max_age, secure=True,
+                max_age=settings.jwt_access_token_cookie_max_age, secure=True,
                 httponly=True, samesite="Lax"
             )
             response.set_cookie(
                 key="refresh_token", value=result.refresh_token,
-                max_age=settings.refresh_token_max_age, secure=True,
+                max_age=settings.jwt_refresh_token_cookie_max_age, secure=True,
                 httponly=True, samesite="Lax"
             )
 

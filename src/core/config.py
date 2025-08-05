@@ -15,8 +15,14 @@ class Settings(BaseSettings):
     postgres_host: str
     postgres_port: int
 
-    access_token_max_age: int = 900
-    refresh_token_max_age: int = 60 * 60 * 24 * 30
+    jwt_secret_key: str
+    jwt_refresh_secret_key: str
+    jwt_algorithm: str
+    jwt_access_token_expire_minutes: int
+    jwt_refresh_token_expire_days: int
+
+    kafka_host: str
+    kafka_port: int
 
     model_config = SettingsConfigDict(env_file=".env")
 
@@ -26,6 +32,18 @@ class Settings(BaseSettings):
             f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
         )
+
+    @property
+    def kafka_bootstrap_servers(self) -> str:
+        return f"{self.kafka_host}:{self.kafka_port}"
+
+    @property
+    def jwt_access_token_cookie_max_age(self) -> int:
+        return self.jwt_access_token_expire_minutes * 60
+
+    @property
+    def jwt_refresh_token_cookie_max_age(self) -> int:
+        return self.jwt_refresh_token_expire_days * 24 * 60 * 60
 
 
 @lru_cache
