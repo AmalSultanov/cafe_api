@@ -3,17 +3,16 @@ import src.admin
 from fastapi_amis_admin.admin.settings import Settings
 from fastapi_amis_admin.admin.site import AdminSite
 
-from src.core.config import (
-    POSTGRES_DATABASE_URL, FASTAPI_HOST, FASTAPI_PORT, FASTAPI_DEBUG,
-    FASTAPI_VERSION
-)
+from src.core.config import get_settings
+
+settings = get_settings()
 
 site = AdminSite(settings=Settings(
-    host=FASTAPI_HOST,
-    port=FASTAPI_PORT,
-    debug=FASTAPI_DEBUG,
-    version=FASTAPI_VERSION,
+    host=settings.fastapi_host,
+    port=settings.fastapi_port,
+    debug=settings.fastapi_debug,
+    version=settings.fastapi_version,
     site_title="Cafe API Admin Dashboard",
-    database_url_async=POSTGRES_DATABASE_URL,
+    database_url_async=settings.postgres_url,
     amis_theme="dark"
 ))

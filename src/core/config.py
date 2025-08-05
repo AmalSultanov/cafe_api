@@ -1,20 +1,33 @@
-import os
+from functools import lru_cache
 
-from dotenv import load_dotenv
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-load_dotenv()
 
-FASTAPI_HOST = os.getenv("FASTAPI_HOST")
-FASTAPI_PORT = int(os.getenv("FASTAPI_PORT"))
-FASTAPI_DEBUG = os.getenv("FASTAPI_DEBUG")
-FASTAPI_VERSION = os.getenv("FASTAPI_VERSION")
+class Settings(BaseSettings):
+    fastapi_host: str
+    fastapi_port: int
+    fastapi_debug: bool
+    fastapi_version: str
 
-POSTGRES_DB = os.getenv("POSTGRES_DB")
-POSTGRES_USER = os.getenv("POSTGRES_USER")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
-POSTGRES_HOST = os.getenv("POSTGRES_HOST")
-POSTGRES_PORT = os.getenv("POSTGRES_PORT")
-POSTGRES_DATABASE_URL = (
-    f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}"
-    f"@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
-)
+    postgres_db: str
+    postgres_user: str
+    postgres_password: str
+    postgres_host: str
+    postgres_port: int
+
+    access_token_max_age: int = 900
+    refresh_token_max_age: int = 60 * 60 * 24 * 30
+
+    model_config = SettingsConfigDict(env_file=".env")
+
+    @property
+    def postgres_url(self) -> str:
+        return (
+            f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}"
+            f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
+        )
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()

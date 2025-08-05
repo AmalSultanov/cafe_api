@@ -5,9 +5,11 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 
-from src.core.config import POSTGRES_DATABASE_URL
+from src.core.config import get_settings
 
-async_engine = create_async_engine(url=POSTGRES_DATABASE_URL, echo=True)
+settings = get_settings()
+
+async_engine = create_async_engine(url=settings.postgres_url, echo=True)
 async_session = async_sessionmaker(
     bind=async_engine, autoflush=False,
     autocommit=False, expire_on_commit=False
