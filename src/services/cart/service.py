@@ -29,7 +29,7 @@ class CartService:
         if not cart:
             raise CartNotFoundError(user_id)
 
-        upd_cart = self.repository.update(
+        upd_cart = await self.repository.update(
             user_id, cart_data.model_dump(exclude_unset=True)
         )
         return CartRead.model_validate(upd_cart)
