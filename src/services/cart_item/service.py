@@ -105,6 +105,9 @@ class CartItemService:
 
         if "quantity" in new_data:
             quantity = new_data["quantity"]
+            if quantity == 0:
+                return await self.remove_item_from_cart(user_id, item_id)
+
             new_total_price = item.unit_price * quantity
             new_data["total_price"] = new_total_price
             event = CartUpdatedEvent(

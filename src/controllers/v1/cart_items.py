@@ -46,17 +46,13 @@ async def add_item_to_cart(
 ):
     try:
         return await service.add_item_to_cart(user_id, item_data)
-    except CartNotFoundError as e:
+    except (CartNotFoundError, MealNotFoundError) as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
     except CartItemQuantityError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
-        )
-    except MealNotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
 
 
@@ -103,11 +99,7 @@ async def get_cart_item(
 ):
     try:
         return await service.get_cart_item(user_id, item_id)
-    except CartNotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
-        )
-    except CartItemNotFoundError as e:
+    except (CartNotFoundError, CartItemNotFoundError) as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
@@ -115,10 +107,11 @@ async def get_cart_item(
 
 @router.patch(
     "/{user_id}/cart/items/{item_id}",
-    response_model=CartItemRead,
+    response_model=CartItemRead | None,
     description=(
         "Update one or more fields of a specific cart item. "
-        "Only the fields that need to be updated must be provided."
+        "Only the fields that need to be updated must be provided. "
+        "If quantity is set to 0, this item will be removed from cart."
     ),
     response_description="Details of the updated cart item",
     responses={
@@ -141,21 +134,13 @@ async def update_cart_item(
 ):
     try:
         return await service.update_cart_item(user_id, item_id, item_data)
-    except NoCartItemUpdateDataError as e:
+    except (NoCartItemUpdateDataError, CartItemQuantityError) as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
         )
-    except CartNotFoundError as e:
+    except (CartNotFoundError, CartItemNotFoundError) as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
-        )
-    except CartItemNotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
-        )
-    except CartItemQuantityError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
         )
 
 
@@ -178,11 +163,7 @@ async def delete_cart_item(
 ):
     try:
         await service.remove_item_from_cart(user_id, item_id)
-    except CartNotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
-        )
-    except CartItemNotFoundError as e:
+    except (CartNotFoundError, CartItemNotFoundError) as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
@@ -206,11 +187,7 @@ async def delete_cart_items(
 ):
     try:
         await service.remove_items_from_cart(user_id)
-    except CartNotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
-        )
-    except CartItemsNotFoundError as e:
+    except (CartNotFoundError, CartItemsNotFoundError) as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
