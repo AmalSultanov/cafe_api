@@ -4,9 +4,8 @@ from src.exceptions.user import (
     UserNotFoundError, UserPhoneAlreadyExistsError, NoUserUpdateDataError,
     UserIdentityAlreadyExistsError, UserProviderIdAlreadyExistsError
 )
-from src.message_broker.config import broker
 from src.message_broker.events.user import UserCreatedEvent
-from src.message_broker.publisher import EventPublisher
+from src.message_broker.publisher.interface import IEventPublisher
 from src.message_broker.topics import TOPIC_USER_CREATED
 from src.repositories.user.interface import IUserRepository
 from src.schemas.common import PaginationParams
@@ -22,10 +21,12 @@ class UserService:
     def __init__(
         self,
         repository: IUserRepository,
-        identity_service: IUserIdentityService
+        identity_service: IUserIdentityService,
+        publisher: IEventPublisher
     ) -> None:
         self.repository = repository
         self.identity_service = identity_service
+        self.publisher = publisher
 
     async def create_user(
         self, user_data: UserRegister
@@ -61,9 +62,7 @@ class UserService:
             raise
 
         event = UserCreatedEvent(user_id=user.id)
-        publisher = EventPublisher(broker)
-
-        await publisher.publish(TOPIC_USER_CREATED, event.model_dump())
+        await self.publisher.publish(TOPIC_USER_CREATED, event.model_dump())
 
         if user_data.provider == ProviderEnum.web:
             access_token = create_access_token(user.id)

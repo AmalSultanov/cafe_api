@@ -2,9 +2,8 @@ from src.exceptions.cart import CartNotFoundError
 from src.exceptions.cart_item import (
     CartItemNotFoundError, CartItemsNotFoundError, NoCartItemUpdateDataError
 )
-from src.message_broker.config import broker
 from src.message_broker.events.cart import CartUpdatedEvent
-from src.message_broker.publisher import EventPublisher
+from src.message_broker.publisher.interface import IEventPublisher
 from src.message_broker.topics import TOPIC_CART_UPDATED
 from src.repositories.cart_item.interface import ICartItemRepository
 from src.schemas.cart import CartPatchUpdate
@@ -20,11 +19,13 @@ class CartItemService:
         self,
         repository: ICartItemRepository,
         cart_service: ICartService,
-        meal_service: IMealService
+        meal_service: IMealService,
+        publisher: IEventPublisher
     ) -> None:
         self.repository = repository
         self.cart_service = cart_service
         self.meal_service = meal_service
+        self.publisher = publisher
 
     async def add_item_to_cart(
         self, user_id: int, item_data: CartItemCreate
@@ -61,9 +62,7 @@ class CartItemService:
             )
         )
 
-        publisher = EventPublisher(broker)
-
-        await publisher.publish(TOPIC_CART_UPDATED, event.model_dump())
+        await self.publisher.publish(TOPIC_CART_UPDATED, event.model_dump())
         return CartItemRead.model_validate(item)
 
     async def get_cart_items(self, user_id: int) -> list[CartItemRead]:
@@ -117,8 +116,7 @@ class CartItemService:
                 )
             )
 
-            publisher = EventPublisher(broker)
-            await publisher.publish(TOPIC_CART_UPDATED, event.model_dump())
+            await self.publisher.publish(TOPIC_CART_UPDATED, event.model_dump())
 
         upd_item = await self.repository.update(item_id, new_data)
         return CartItemRead.model_validate(upd_item)
@@ -140,8 +138,7 @@ class CartItemService:
                 total_price=cart.total_price-item.total_price
             )
         )
-        publisher = EventPublisher(broker)
-        await publisher.publish(TOPIC_CART_UPDATED, event.model_dump())
+        await self.publisher.publish(TOPIC_CART_UPDATED, event.model_dump())
         await self.repository.delete_by_id(item.id)
 
     async def remove_items_from_cart(self, user_id: int) -> None:
@@ -156,6 +153,5 @@ class CartItemService:
         event = CartUpdatedEvent(
             user_id=user_id, cart_data=CartPatchUpdate(total_price=0)
         )
-        publisher = EventPublisher(broker)
-        await publisher.publish(TOPIC_CART_UPDATED, event.model_dump())
+        await self.publisher.publish(TOPIC_CART_UPDATED, event.model_dump())
         await self.repository.delete_all_by_cart_id(cart.id)
