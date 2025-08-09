@@ -14,7 +14,8 @@ from src.schemas.common import PaginationParams
 from src.schemas.http_error import HTTPError
 from src.schemas.user import (
     UserRegister, UserRead, IdentityCheck, UserPutUpdate, UserPatchUpdate,
-    IdentityRead, IdentityStatusResponse, PaginatedUserResponse, UserWithTokens
+    IdentityRead, IdentityStatusResponse, PaginatedUserResponse,
+    UserWithTokens, LogoutResponse
 )
 from src.services.user.identity.interface import IUserIdentityService
 from src.services.user.interface import IUserService
@@ -271,6 +272,32 @@ async def partial_update_user(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
+
+
+@router.post(
+    "/{user_id}/logout",
+    response_model=LogoutResponse,
+    status_code=status.HTTP_200_OK,
+    description="Logout user",
+    response_description="Logout confirmation",
+    responses={
+        400: {
+            "model": HTTPError,
+            "description": "Invalid refresh token"
+        }
+    }
+)
+async def logout(
+    response: Response
+):
+    response.delete_cookie(
+        key="access_token", httponly=True, secure=True, samesite="Lax"
+    )
+    response.delete_cookie(
+        key="refresh_token", httponly=True, secure=True, samesite="Lax"
+    )
+
+    return LogoutResponse(message="Successfully logged out")
 
 
 @router.delete(
