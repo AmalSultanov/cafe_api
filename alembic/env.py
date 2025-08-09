@@ -7,18 +7,19 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
-from src.core.config import POSTGRES_DATABASE_URL
+from src.core.config import get_settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+settings = get_settings()
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", POSTGRES_DATABASE_URL)
+config.set_main_option("sqlalchemy.url", settings.postgres_url)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -30,7 +31,7 @@ from src.models.user import UserIdentityModel
 from src.models.cart import CartModel
 from src.models.cart_item import CartItemModel
 from src.models.order import OrderModel
-from src.models.order_item import OrderItemRead
+from src.models.order_item import OrderItemModel
 
 target_metadata = Base.metadata
 # target_metadata = None
