@@ -6,14 +6,20 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import DeclarativeBase
 
 from src.core.config import get_settings
+from src.core.logging import logger
 
 settings = get_settings()
 
+logger.info(
+    f"Initializing database connection to: "
+    f"{settings.postgres_host}:{settings.postgres_port}"
+)
 async_engine = create_async_engine(url=settings.postgres_url, echo=True)
 async_session = async_sessionmaker(
     bind=async_engine, autoflush=False,
     autocommit=False, expire_on_commit=False
 )
+logger.info("Database engine and session factory were created")
 
 
 class Base(DeclarativeBase):
@@ -31,5 +37,9 @@ class Base(DeclarativeBase):
 
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
+    logger.debug("Creating new database session")
     async with async_session() as session:
-        yield session
+        try:
+            yield session
+        finally:
+            logger.debug("Database session was closed")
