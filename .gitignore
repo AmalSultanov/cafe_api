@@ -163,3 +163,7 @@ cython_debug/
 .idea/
 .DS_Store
 upload/
+
+# Application logs
+src/logs/*.log
+!src/logs/.gitkeep
