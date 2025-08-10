@@ -6,6 +6,7 @@ from sqlalchemy.future import select
 from sqlalchemy import delete
 from sqlalchemy.orm import selectinload
 
+from src.core.logging import logger
 from src.models.order import OrderModel
 from src.models.order_item import OrderItemModel
 
@@ -20,6 +21,10 @@ class OrderRepository:
         order_data: dict[str, str | Decimal | datetime],
         items_data: list[dict[str, int | str]]
     ) -> OrderModel:
+        logger.debug(
+            f"Order repo: Creating order for user {user_id} "
+            f"with {len(items_data)} items"
+        )
         order = OrderModel(user_id=user_id, **order_data)
         self.db.add(order)
         await self.db.flush()
@@ -39,37 +44,64 @@ class OrderRepository:
         self.db.add_all(order_items)
         await self.db.commit()
         await self.db.refresh(order)
+        logger.info(
+            f"Order repo: Order was created for user "
+            f"{user_id} with ID: {order.id}"
+        )
 
         return await self.get_by_user_and_order_id(user_id, order.id)
 
     async def get_all(self, user_id: int) -> list[OrderModel]:
+        logger.debug(f"Order repo: Getting all orders for user {user_id}")
         result = await self.db.execute(
             select(OrderModel)
             .options(selectinload(OrderModel.items))
             .where(OrderModel.user_id == user_id)
             .order_by(OrderModel.created_at.desc())
         )
-        return result.scalars().all()
+        orders = result.scalars().all()
+        logger.debug(f"Order repo: Retrieved {len(orders)} orders for user {user_id}")
+
+        return orders
 
     async def get_by_user_and_order_id(
         self, user_id: int, order_id: int
     ) -> OrderModel | None:
+        logger.debug(f"Order repo: Getting order {order_id} for user {user_id}")
         result = await self.db.execute(
             select(OrderModel)
             .options(selectinload(OrderModel.items))
             .where(OrderModel.id == order_id, OrderModel.user_id == user_id)
         )
-        return result.scalar_one_or_none()
+        order = result.scalar_one_or_none()
+
+        if order:
+            logger.debug(
+                f"Order repo: Found order {order_id} for user "
+                f"{user_id} with {len(order.items)} items"
+            )
+        else:
+            logger.debug(
+                f"Order repo: Order {order_id} was not found for user {user_id}"
+            )
+
+        return order
 
     async def delete_one(self, user_id: int, order_id: int) -> None:
+        logger.debug(f"Order repo: Deleting order {order_id} for user {user_id}")
         await self.db.execute(
             delete(OrderModel)
             .where(OrderModel.id == order_id, OrderModel.user_id == user_id)
         )
         await self.db.commit()
+        logger.info(
+            f"Order repo: Order {order_id} was deleted for user {user_id}"
+        )
 
     async def delete_all(self, user_id: int) -> None:
+        logger.debug(f"Order repo: Deleting all orders for user {user_id}")
         await self.db.execute(
             delete(OrderModel).where(OrderModel.user_id == user_id)
         )
         await self.db.commit()
+        logger.info(f"Order repo: All orders were deleted for user {user_id}")
