@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.core.dependencies.cart import get_cart_service
+from src.core.logging import logger
 from src.exceptions.cart import CartNotFoundError, CartAlreadyExistsError
 from src.schemas.cart import CartRead
 from src.schemas.http_error import HTTPError
@@ -26,9 +27,13 @@ async def create_cart(
     user_id: int,
     service: ICartService = Depends(get_cart_service)
 ):
+    logger.info(f"API request: Create cart for user {user_id}")
     try:
-        return await service.create_cart(user_id)
+        result = await service.create_cart(user_id)
+        logger.info(f"API response: Cart created for user {user_id}")
+        return result
     except CartAlreadyExistsError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
@@ -50,9 +55,13 @@ async def get_cart(
     user_id: int,
     service: ICartService = Depends(get_cart_service)
 ):
+    logger.info(f"API request: Get cart for user {user_id}")
     try:
-        return await service.get_cart_by_user_id(user_id)
+        result = await service.get_cart_by_user_id(user_id)
+        logger.info(f"API response: Cart retrieved for user {user_id}")
+        return result
     except CartNotFoundError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
@@ -74,9 +83,12 @@ async def delete_cart(
     user_id: int,
     service: ICartService = Depends(get_cart_service)
 ):
+    logger.info(f"API request: Delete cart for user {user_id}")
     try:
         await service.delete_cart_by_user_id(user_id)
+        logger.info(f"API response: Cart deleted for user {user_id}")
     except CartNotFoundError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.core.dependencies.cart_item import get_cart_item_service
+from src.core.logging import logger
 from src.exceptions.cart import CartNotFoundError
 from src.exceptions.cart_item import (
     CartItemNotFoundError, CartItemsNotFoundError, NoCartItemUpdateDataError,
@@ -44,9 +45,18 @@ async def add_item_to_cart(
     item_data: CartItemCreate,
     service: ICartItemService = Depends(get_cart_item_service)
 ):
+    logger.info(
+        f"API request: Add item to cart for user {user_id}, "
+        f"meal_id: {item_data.meal_id}"
+    )
     try:
-        return await service.add_item_to_cart(user_id, item_data)
+        result = await service.add_item_to_cart(user_id, item_data)
+        logger.info(
+            f"API response: Item was added to cart for user {user_id}"
+        )
+        return result
     except (CartNotFoundError, MealNotFoundError) as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
@@ -72,9 +82,15 @@ async def get_cart_items(
     user_id: int,
     service: ICartItemService = Depends(get_cart_item_service)
 ):
+    logger.info(f"API request: Get cart items for user {user_id}")
     try:
-        return await service.get_cart_items(user_id)
+        result = await service.get_cart_items(user_id)
+        logger.info(
+            f"API response: Got {len(result)} cart items for user {user_id}"
+        )
+        return result
     except CartNotFoundError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
@@ -97,9 +113,15 @@ async def get_cart_item(
     item_id: int,
     service: ICartItemService = Depends(get_cart_item_service)
 ):
+    logger.info(f"API request: Get cart item {item_id} for user {user_id}")
     try:
-        return await service.get_cart_item(user_id, item_id)
+        result = await service.get_cart_item(user_id, item_id)
+        logger.info(
+            f"API response: Cart item {item_id} was retrieved for user {user_id}"
+        )
+        return result
     except (CartNotFoundError, CartItemNotFoundError) as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
@@ -132,13 +154,20 @@ async def update_cart_item(
     item_data: CartItemPatchUpdate,
     service: ICartItemService = Depends(get_cart_item_service)
 ):
+    logger.info(f"API request: Update cart item {item_id} for user {user_id}")
     try:
-        return await service.update_cart_item(user_id, item_id, item_data)
+        result = await service.update_cart_item(user_id, item_id, item_data)
+        logger.info(
+            f"API response: Cart item {item_id} was updated for user {user_id}"
+        )
+        return result
     except (NoCartItemUpdateDataError, CartItemQuantityError) as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
         )
     except (CartNotFoundError, CartItemNotFoundError) as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
@@ -161,9 +190,14 @@ async def delete_cart_item(
     item_id: int,
     service: ICartItemService = Depends(get_cart_item_service)
 ):
+    logger.info(f"API request: Delete cart item {item_id} for user {user_id}")
     try:
         await service.remove_item_from_cart(user_id, item_id)
+        logger.info(
+            f"API response: Cart item {item_id} was deleted for user {user_id}"
+        )
     except (CartNotFoundError, CartItemNotFoundError) as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
@@ -185,9 +219,14 @@ async def delete_cart_items(
     user_id: int,
     service: ICartItemService = Depends(get_cart_item_service)
 ):
+    logger.info(f"API request: Delete all cart items for user {user_id}")
     try:
         await service.remove_items_from_cart(user_id)
+        logger.info(
+            f"API response: All cart items were deleted for user {user_id}"
+        )
     except (CartNotFoundError, CartItemsNotFoundError) as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )

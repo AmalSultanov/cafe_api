@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.core.dependencies.order import get_order_service
+from src.core.logging import logger
 from src.exceptions.cart import CartNotFoundError
 from src.exceptions.cart_item import CartItemsNotFoundError
 from src.exceptions.order import OrdersNotFound, OrderNotFound
@@ -29,9 +30,16 @@ async def create_order(
     order_data: OrderCreate,
     service: IOrderService = Depends(get_order_service)
 ):
+    logger.info(f"API request: Create order for user {user_id}")
     try:
-        return await service.create_order(user_id, order_data)
+        result = await service.create_order(user_id, order_data)
+        logger.info(
+            f"API response: Order was created for user {user_id} "
+            f"with ID: {result.id}"
+        )
+        return result
     except (CartNotFoundError, CartItemsNotFoundError) as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
@@ -53,9 +61,15 @@ async def get_orders(
     user_id: int,
     service: IOrderService = Depends(get_order_service)
 ):
+    logger.info(f"API request: Get orders for user {user_id}")
     try:
-        return await service.get_orders(user_id)
+        result = await service.get_orders(user_id)
+        logger.info(
+            f"API response: Retrieved {len(result)} orders for user {user_id}"
+        )
+        return result
     except OrdersNotFound as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
@@ -78,9 +92,15 @@ async def get_order(
     order_id: int,
     service: IOrderService = Depends(get_order_service)
 ):
+    logger.info(f"API request: Get order {order_id} for user {user_id}")
     try:
-        return await service.get_order(user_id, order_id)
+        result = await service.get_order(user_id, order_id)
+        logger.info(
+            f"API response: Order {order_id} was retrieved for user {user_id}"
+        )
+        return result
     except OrderNotFound as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
@@ -103,9 +123,14 @@ async def delete_order(
     order_id: int,
     service: IOrderService = Depends(get_order_service)
 ):
+    logger.info(f"API request: Delete order {order_id} for user {user_id}")
     try:
         await service.delete_order(user_id, order_id)
+        logger.info(
+            f"API response: Order {order_id} was deleted for user {user_id}"
+        )
     except OrderNotFound as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
@@ -127,9 +152,12 @@ async def delete_orders(
     user_id: int,
     service: IOrderService = Depends(get_order_service)
 ):
+    logger.info(f"API request: Delete all orders for user {user_id}")
     try:
         await service.delete_orders(user_id)
+        logger.info(f"API response: All orders were deleted for user {user_id}")
     except OrdersNotFound as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )

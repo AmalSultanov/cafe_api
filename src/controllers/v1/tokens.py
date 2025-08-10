@@ -4,6 +4,7 @@ from fastapi import (
 from jose.exceptions import JWTError, ExpiredSignatureError
 
 from src.core.config import Settings, get_settings
+from src.core.logging import logger
 from src.core.utils.jwt import decode_refresh_token, create_access_token
 from src.schemas.http_error import HTTPError
 from src.schemas.token import AccessTokenResponse
@@ -36,9 +37,11 @@ async def refresh_access_token(
     response: Response,
     settings: Settings = Depends(get_settings)
 ):
+    logger.info("API request: Refresh access token")
     refresh_token = request.cookies.get("refresh_token")
 
     if not refresh_token:
+        logger.warning("API error: Refresh token missing")
         raise HTTPException(status_code=401, detail="Refresh token missing")
 
     try:
@@ -55,8 +58,10 @@ async def refresh_access_token(
             httponly=True, samesite="Lax"
         )
 
+        logger.info(f"API response: Access token was refreshed for user {user_id}")
         return {"status": "access_token_refreshed"}
     except (ExpiredSignatureError, JWTError) as e:
+        logger.warning(f"API error: Token refresh failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e)
         )

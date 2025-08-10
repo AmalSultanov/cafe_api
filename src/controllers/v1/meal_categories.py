@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.core.dependencies.meal_category import get_meal_category_service
+from src.core.logging import logger
 from src.exceptions.meal_category import (
     MealCategoryAlreadyExistsError, MealCategoryNotFoundError,
     NoMealCategoryUpdateDataError
@@ -34,9 +35,15 @@ async def create_category(
     category_data: MealCategoryCreate,
     service: IMealCategoryService = Depends(get_meal_category_service)
 ):
+    logger.info(f"API request: Create meal category '{category_data.name}'")
     try:
-        return await service.create_category(category_data)
+        result = await service.create_category(category_data)
+        logger.info(
+            f"API response: Meal category created with ID: {result.id}"
+        )
+        return result
     except MealCategoryAlreadyExistsError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
@@ -55,7 +62,19 @@ async def get_categories(
     pagination_params: PaginationParams = Depends(PaginationParams),
     service: IMealCategoryService = Depends(get_meal_category_service)
 ):
-    return await service.get_categories(pagination_params)
+    logger.info(
+        f"API request: Get meal categories - page: {pagination_params.page}, "
+        f"per_page: {pagination_params.per_page}"
+    )
+    try:
+        result = await service.get_categories(pagination_params)
+        logger.info(
+            f"API response: Retrieved {len(result.categories)} meal categories"
+        )
+        return result
+    except Exception as e:
+        logger.error(f"API error: Failed to get meal categories: {e}")
+        raise
 
 
 @router.get(
@@ -74,9 +93,13 @@ async def get_category(
     category_id: int,
     service: IMealCategoryService = Depends(get_meal_category_service)
 ):
+    logger.info(f"API request: Get meal category {category_id}")
     try:
-        return await service.get_category(category_id)
+        result = await service.get_category(category_id)
+        logger.info(f"API response: Meal category {category_id} was retrieved")
+        return result
     except MealCategoryNotFoundError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
@@ -107,17 +130,23 @@ async def update_category(
     category_data: MealCategoryPatchUpdate,
     service: IMealCategoryService = Depends(get_meal_category_service)
 ):
+    logger.info(f"API request: Update meal category {category_id}")
     try:
-        return await service.update_category(category_id, category_data)
+        result = await service.update_category(category_id, category_data)
+        logger.info(f"API response: Meal category {category_id} was updated")
+        return result
     except NoMealCategoryUpdateDataError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
         )
     except MealCategoryNotFoundError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
     except MealCategoryAlreadyExistsError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
@@ -139,9 +168,13 @@ async def delete_category(
     category_id: int,
     service: IMealCategoryService = Depends(get_meal_category_service)
 ):
+    logger.info(f"API request: Delete meal category {category_id}")
     try:
-        return await service.delete_category(category_id)
+        result = await service.delete_category(category_id)
+        logger.info(f"API response: Meal category {category_id} was deleted")
+        return result
     except MealCategoryNotFoundError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )

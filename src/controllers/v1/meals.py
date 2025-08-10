@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.core.dependencies.meal import get_meal_service
+from src.core.logging import logger
 from src.exceptions.meal import (
     MealNotFoundError, MealAlreadyExistsError, NoMealUpdateDataError,
     MealPriceError
@@ -46,17 +47,25 @@ async def create_meal(
     meal_data: MealCreate,
     service: IMealService = Depends(get_meal_service)
 ):
+    logger.info(
+        f"API request: Create meal '{meal_data.name}' in category {category_id}"
+    )
     try:
-        return await service.create_meal(category_id, meal_data)
+        result = await service.create_meal(category_id, meal_data)
+        logger.info(f"API response: Meal was created with ID: {result.id}")
+        return result
     except MealPriceError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
         )
     except MealCategoryNotFoundError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
     except MealAlreadyExistsError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
@@ -84,11 +93,20 @@ async def get_meals(
     pagination_params: PaginationParams = Depends(PaginationParams),
     service: IMealService = Depends(get_meal_service)
 ):
+    logger.info(
+        f"API request: Get meals for category {category_id} - page: "
+        f"{pagination_params.page}, per_page: {pagination_params.per_page}"
+    )
     try:
-        return await service.get_meals_by_category_id(
+        result = await service.get_meals_by_category_id(
             category_id, pagination_params
         )
+        logger.info(
+            f"API response: Got {len(result.meals)} meals for category {category_id}"
+        )
+        return result
     except MealCategoryNotFoundError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
@@ -113,13 +131,20 @@ async def get_meal(
     meal_id: int,
     service: IMealService = Depends(get_meal_service)
 ):
+    logger.info(f"API request: Get meal {meal_id} from category {category_id}")
     try:
-        return await service.get_meal(meal_id, category_id)
+        result = await service.get_meal(meal_id, category_id)
+        logger.info(
+            f"API response: Meal {meal_id} was retrieved from category {category_id}"
+        )
+        return result
     except MealCategoryNotFoundError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
     except MealNotFoundError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
@@ -157,25 +182,35 @@ async def update_meal(
     meal_data: MealPutUpdate,
     service: IMealService = Depends(get_meal_service)
 ):
+    logger.info(f"API request: Update meal {meal_id} in category {category_id}")
     try:
-        return await service.update_meal(category_id, meal_id, meal_data)
+        result = await service.update_meal(category_id, meal_id, meal_data)
+        logger.info(
+            f"API response: Meal {meal_id} was updated in category {category_id}"
+        )
+        return result
     except MealPriceError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
         )
     except NoMealUpdateDataError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
         )
     except MealCategoryNotFoundError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
     except MealNotFoundError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
     except MealAlreadyExistsError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
@@ -212,25 +247,40 @@ async def partial_update_meal(
     meal_data: MealPatchUpdate,
     service: IMealService = Depends(get_meal_service)
 ):
+    logger.info(
+        f"API request: Partial update meal {meal_id} in category {category_id}"
+    )
     try:
-        return await service.update_meal(category_id, meal_id, meal_data, True)
+        result = await service.update_meal(
+            category_id, meal_id, meal_data, True
+        )
+        logger.info(
+            f"API response: Meal {meal_id} was partially "
+            f"updated in category {category_id}"
+        )
+        return result
     except MealPriceError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
         )
     except NoMealUpdateDataError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
         )
     except MealCategoryNotFoundError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
     except MealNotFoundError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
     except MealAlreadyExistsError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )
@@ -253,13 +303,19 @@ async def delete_meal(
     meal_id: int,
     service: IMealService = Depends(get_meal_service)
 ):
+    logger.info(f"API request: Delete meal {meal_id} from category {category_id}")
     try:
         await service.delete_meal(category_id, meal_id)
+        logger.info(
+            f"API response: Meal {meal_id} was deleted from category {category_id}"
+        )
     except MealCategoryNotFoundError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
     except MealNotFoundError as e:
+        logger.warning(f"API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
