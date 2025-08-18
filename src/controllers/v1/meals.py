@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, \
+    File, Form
 
 from src.core.dependencies.meal import get_meal_service
 from src.core.logging import logger
@@ -23,7 +24,7 @@ router = APIRouter(prefix="/meal-categories", tags=["Meals"])
     status_code=status.HTTP_201_CREATED,
     description=(
         "Create a new meal under the specified category. "
-        "The meal name must be unique."
+        "`image_url` and `meal_name` field must be unique."
     ),
     response_description="Details of the newly created meal",
     responses={
@@ -102,7 +103,7 @@ async def get_meals(
             category_id, pagination_params
         )
         logger.info(
-            f"API response: Got {len(result.meals)} meals for category {category_id}"
+            f"API response: Got {len(result.items)} meals for category {category_id}"
         )
         return result
     except MealCategoryNotFoundError as e:

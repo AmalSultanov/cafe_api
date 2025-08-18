@@ -5,12 +5,12 @@ from src.models.user import UserModel, UserIdentityModel
 
 
 @site.register_admin
-class UserAdmin(admin.ModelAdmin):
+class UserModelAdmin(admin.ModelAdmin):
     page_schema = "UserModel"
     model = UserModel
 
 
 @site.register_admin
-class UserIdentityAdmin(admin.ModelAdmin):
+class UserIdentityModelAdmin(admin.ModelAdmin):
     page_schema = "UserIdentityModel"
     model = UserIdentityModel

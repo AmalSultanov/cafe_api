@@ -5,6 +5,6 @@ from src.models.cart_item import CartItemModel
 
 
 @site.register_admin
-class CartItemAdmin(admin.ModelAdmin):
+class CartItemModelAdmin(admin.ModelAdmin):
     page_schema = "CartItemModel"
     model = CartItemModel

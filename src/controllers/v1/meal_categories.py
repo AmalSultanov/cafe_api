@@ -69,7 +69,7 @@ async def get_categories(
     try:
         result = await service.get_categories(pagination_params)
         logger.info(
-            f"API response: Retrieved {len(result.categories)} meal categories"
+            f"API response: Retrieved {len(result.items)} meal categories"
         )
         return result
     except Exception as e:

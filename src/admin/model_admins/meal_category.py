@@ -5,6 +5,6 @@ from src.models.meal_category import MealCategoryModel
 
 
 @site.register_admin
-class MealCategoryAdmin(admin.ModelAdmin):
+class MealCategoryModelAdmin(admin.ModelAdmin):
     page_schema = "MealCategoryModel"
     model = MealCategoryModel
