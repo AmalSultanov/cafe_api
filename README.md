@@ -88,7 +88,7 @@ The system uses PostgreSQL with the following main entities and relationships:
 
 2. **Create a `.env` file and set environment variables in any editor**
 
-   Refer to the [⚙️ Environment Variables](#-environment-variables) section for clarification.
+   Refer to the [⚙️ Environment Variables](#%EF%B8%8F-environment-variables) section for clarification.
 
    ```bash
    cp .env.example .env
