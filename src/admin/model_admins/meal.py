@@ -9,8 +9,8 @@ from src.models.meal import MealModel
 
 @site.register_admin
 class MealModelAdmin(admin.ModelAdmin):
+    page_schema = "MealModel"
     model = MealModel
-    page_schema = "Meal"
 
     async def get_create_form(self, request, bulk: bool = False, **kwargs):
         form = await super().get_create_form(request, bulk=bulk, **kwargs)
@@ -18,7 +18,7 @@ class MealModelAdmin(admin.ModelAdmin):
             InputImage(
                 name="image_url",
                 label="meal_image",
-                receiver="post:/api/v1/admin/upload-meal-image",
+                receiver="post:/admin/upload-meal-image",
                 accept="image/*",
                 maxSize=5 * 1024 * 1024,
                 required=True
@@ -32,7 +32,7 @@ class MealModelAdmin(admin.ModelAdmin):
             InputImage(
                 name="image_url",
                 label="Meal Image",
-                receiver="post:/api/v1/admin/upload-meal-image",
+                receiver="post:/admin/upload-meal-image",
                 accept="image/*",
                 maxSize=5 * 1024 * 1024,
             )
@@ -67,7 +67,7 @@ class MealModelAdmin(admin.ModelAdmin):
                             label="CSV/Excel File",
                             accept=".csv,.xlsx",
                             required=True,
-                            receiver="/api/v1/admin/meal-import"
+                            receiver="/admin/meal-import"
                         )
                     ]
                 )
