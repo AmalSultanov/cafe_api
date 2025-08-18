@@ -53,7 +53,9 @@ class UserIdentityService:
                 f"provider_id {identity_dict['provider_id']} in "
                 f"{identity_dict['provider']}"
             )
-            raise UserIdentityNotFoundError(identity_dict["provider_id"])
+            raise UserIdentityNotFoundError(
+                identity_dict["provider_id"], identity_dict["provider"]
+            )
 
         logger.debug(
             f"User identity service: Found identity for user {identity.user_id}"
