@@ -9,10 +9,16 @@ class EventPublisher:
         self.broker = broker
 
     async def publish(self, topic: str, message: dict[str, Any]):
-        logger.info(f"Publishing event to topic '{topic}': {message}")
+        logger.info(
+            f"Event Publisher: Publishing event to topic '{topic}': {message}"
+        )
         try:
             await self.broker.publish(topic, message)
-            logger.info(f"Event published successfully to topic '{topic}'")
+            logger.info(
+                f"Event Publisher:  Event published successfully to topic '{topic}'"
+            )
         except Exception as e:
-            logger.error(f"Failed to publish event to topic '{topic}': {e}")
+            logger.error(
+                f"Event Publisher: Failed to publish event to topic '{topic}': {e}"
+            )
             raise
