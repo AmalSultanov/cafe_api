@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     kafka_host: str
     kafka_port: int
 
+    aws_access_key_id: str
+    aws_secret_access_key: str
+    aws_region: str
+    aws_s3_bucket_name: str
+
     model_config = SettingsConfigDict(env_file=".env")
 
     @property
@@ -44,6 +49,12 @@ class Settings(BaseSettings):
     @property
     def jwt_refresh_token_cookie_max_age(self) -> int:
         return self.jwt_refresh_token_expire_days * 24 * 60 * 60
+
+    @property
+    def s3_url(self) -> str:
+        return (
+            f"https://{self.aws_s3_bucket_name}.s3.{self.aws_region}.amazonaws.com"
+        )
 
 
 @lru_cache
