@@ -54,12 +54,14 @@ async def refresh_access_token(
 
         response.set_cookie(
             key="access_token", value=new_access_token,
-            max_age=settings.access_token_max_age, secure=True,
+            max_age=settings.jwt_access_token_cookie_max_age, secure=False,
             httponly=True, samesite="Lax"
         )
 
-        logger.info(f"API response: Access token was refreshed for user {user_id}")
-        return {"status": "access_token_refreshed"}
+        logger.info(
+            f"API response: Access token was refreshed for user {user_id}"
+        )
+        return AccessTokenResponse(status="access_token_refreshed")
     except (ExpiredSignatureError, JWTError) as e:
         logger.warning(f"API error: Token refresh failed: {e}")
         raise HTTPException(
