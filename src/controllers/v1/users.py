@@ -1,10 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi import (
+    APIRouter, Depends, HTTPException, status, Response, Request
+)
 
 from src.core.config import Settings, get_settings
 from src.core.dependencies.user import (
     get_user_service, get_user_identity_service
 )
 from src.core.logging import logger
+from src.core.utils.jwt import decode_access_token
 from src.exceptions.cart import CartAlreadyExistsError
 from src.exceptions.user import (
     UserNotFoundError, UserIdentityNotFoundError, UserPhoneAlreadyExistsError,
@@ -68,12 +71,12 @@ async def register(
         if isinstance(result, UserWithTokens):
             response.set_cookie(
                 key="access_token", value=result.access_token,
-                max_age=settings.jwt_access_token_cookie_max_age, secure=True,
+                max_age=settings.jwt_access_token_cookie_max_age, secure=False,
                 httponly=True, samesite="Lax"
             )
             response.set_cookie(
                 key="refresh_token", value=result.refresh_token,
-                max_age=settings.jwt_refresh_token_cookie_max_age, secure=True,
+                max_age=settings.jwt_refresh_token_cookie_max_age, secure=False,
                 httponly=True, samesite="Lax"
             )
             logger.info(f"User registered with tokens for web platform")
@@ -109,19 +112,46 @@ async def register(
     }
 )
 async def log_in(
-    phone_number: str,
-    service: IUserService = Depends(get_user_service)
+    phone_number: str
 ):
     logger.info(f"API request: User login with phone number: {phone_number}")
-    try:
-        result = await service.log_in_user(phone_number)
-        logger.info(f"API response: User login for phone: {phone_number}")
-        return result
-    except Exception as e:
-        logger.error(
-            f"API error: User login failed for phone {phone_number}: {e}"
+
+
+@router.get(
+    "/me",
+    response_model=UserRead,
+    description="Get current authenticated user information",
+    response_description="User info was fetched",
+    responses={
+        401: {
+            "model": HTTPError,
+            "description": "Access token missing"
+        },
+        404: {
+            "model": HTTPError,
+            "description": "User not found"
+        }
+    }
+)
+async def get_current_user_info(
+    request: Request,
+    service: IUserService = Depends(get_user_service)
+):
+    token = request.cookies.get("access_token")
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Access token missing",
         )
-        raise
+
+    payload = decode_access_token(token)
+    try:
+        user_id = int(payload.get("sub"))
+        return await service.get_user(user_id)
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
+        )
 
 
 @router.get(
@@ -206,7 +236,7 @@ async def get_users(
     )
     try:
         result = await service.get_users(pagination_params)
-        logger.info(f"API response: Retrieved {len(result.users)} users")
+        logger.info(f"API response: Retrieved {len(result.items)} users")
         return result
     except Exception as e:
         logger.error(f"API error: Failed to get users: {e}")
@@ -368,6 +398,7 @@ async def logout(
             key="refresh_token", httponly=True, secure=True, samesite="Lax"
         )
         logger.info("API response: User logged out")
+
         return LogoutResponse(message="Successfully logged out")
     except Exception as e:
         logger.error(f"API error: Logout failed: {e}")
