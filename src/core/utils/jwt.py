@@ -18,7 +18,7 @@ def create_access_token(subject: int) -> str:
         "type": "access"
     }
 
-    logger.debug(f"Returning access token for user {subject}...")
+    logger.debug(f"Returning access token for user {subject}")
     return jwt.encode(
         payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
     )
