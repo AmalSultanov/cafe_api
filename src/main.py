@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from faststream import FastStream
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.admin.cusotm_controllers.admin import admin_router
 from src.admin.site import site
 from src.controllers.v1 import api_v1_router
 from src.core.config import get_settings
@@ -54,13 +55,16 @@ logger.info("Configuring FastAPI application...")
 
 app.include_router(api_v1_router, prefix="/api")
 logger.info("API v1 router included")
+app.include_router(admin_router)
+logger.info("Admin router included")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
+    expose_headers=["*"]
 )
 logger.info("CORS middleware configured")
 
@@ -70,6 +74,6 @@ logger.info("Admin site mounted")
 register_cart_items_exception_handlers(app)
 register_users_exception_handlers(app)
 register_meals_exception_handlers(app)
-logger.info("Exception handlers registered")
 
+logger.info("Exception handlers registered")
 logger.info("CafeAPI application configured successfully")
