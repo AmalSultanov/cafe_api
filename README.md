@@ -1,6 +1,6 @@
-# CafeAPI - Food Ordering & Management System
+# CafeAPI - Food Ordering API
 
-A comprehensive FastAPI-based cafe management and ordering system that provides a robust backend for managing users, meals, categories, shopping carts, and orders. The API supports multi-platform user authentication (Telegram and Web), real-time event processing with Kafka, and includes a built-in admin dashboard for easy management.
+A REST API backend service designed for cafes, enabling user management, menu browsing, cart operations, and order processing. Features include JWT authentication, Kafka event-driven integration, and an Amis Admin dashboard for easy system administration.
 
 ---
 
@@ -8,11 +8,11 @@ A comprehensive FastAPI-based cafe management and ordering system that provides 
 
 * [Project Structure](#-project-structure)
 * [Entities Involved](#%EF%B8%8F-entities-involved)
-* [Tech Stack](#-tech-stack)
+* [Tech Stack](#%EF%B8%8F-tech-stack)
 * [How to Run the App](#-how-to-run-the-app)
 * [Environment Variables](#%EF%B8%8F-environment-variables)
 * [API Documentation](#-api-documentation)
-  * [API Endpoints](#%EF%B8%8F-api-endpoints)
+  * [API Endpoints](#-api-endpoints)
   * [Interactive API Docs & Access](#-interactive-api-docs--access)
 * [Future Work](#-future-work)
 
