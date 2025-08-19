@@ -21,6 +21,7 @@ try:
         version=settings.fastapi_version,
         site_title="Cafe API Admin Dashboard",
         database_url_async=settings.postgres_url,
+        language="en_US",
         amis_theme="dark"
     ))
     logger.info("Admin Dashboard initialized successfully with dark theme")
