@@ -33,13 +33,14 @@ def upgrade() -> None:
     op.create_table('user_identities',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('provider', sa.Enum('telegram', 'web', name='identityproviderenum'), nullable=False),
+    sa.Column('provider', sa.Enum('telegram', 'web', name='identity_provider_enum'), nullable=False),
     sa.Column('provider_id', sa.String(), nullable=False),
-    sa.Column('username', sa.String(), nullable=True),
+    sa.Column('username', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('provider', 'provider_id', name='uq_provider_provider_id')
+    sa.UniqueConstraint('provider', 'provider_id', name='uq_provider_provider_id'),
+    sa.UniqueConstraint('provider', 'username', name='uq_provider_username')
     )
     # ### end Alembic commands ###
 
