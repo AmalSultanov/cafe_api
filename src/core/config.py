@@ -23,6 +23,7 @@ class Settings(BaseSettings):
 
     kafka_host: str
     kafka_port: int
+    kafka_controller_port: int
 
     aws_access_key_id: str
     aws_secret_access_key: str
