@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     fastapi_debug: bool
     fastapi_version: str
 
+    cors_origins: str
+
     postgres_db: str
     postgres_user: str
     postgres_password: str
@@ -31,6 +33,10 @@ class Settings(BaseSettings):
     aws_s3_bucket_name: str
 
     model_config = SettingsConfigDict(env_file=".env")
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",")]
 
     @property
     def postgres_url(self) -> str:
