@@ -18,10 +18,6 @@ from src.exceptions.handlers.user import register_users_exception_handlers
 from src.message_broker.subscriber import cart, user
 from src.message_broker.config import kafka_broker
 
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
 settings = get_settings()
 setup_logging()
 
@@ -60,7 +56,7 @@ logger.info("Admin router included")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.cors_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
