@@ -38,8 +38,13 @@ cafe_api/
 │   ├── __init__.py
 │   └── main.py           # Application entry point
 │
+├── tests/
 ├── .env.example
 ├── .gitignore
+├── docker-compose.yml
+├── Dockerfile
+├── poetry.lock
+├── pyproject.toml
 └── README.md
 ```
 
@@ -101,7 +106,7 @@ The system uses PostgreSQL with the following main entities and relationships:
    docker compose up --build
    ```
 
-4. The app will be available at [`http://127.0.0.1`](http://127.0.0.1). Interactive Swagger docs will be available at [`http://127.0.0.1/api/docs`](http://127.0.0.1/api/docs)
+The app will be available at [`http://localhost`](http://localhost).
 
 ---
 
