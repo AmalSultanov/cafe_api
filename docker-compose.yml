@@ -1,6 +1,7 @@
 services:
   app:
     build: .
+    image: cafe_api_image
     container_name: cafe_api
     restart: always
     env_file:
@@ -10,10 +11,8 @@ services:
     depends_on:
       - cafe_db
       - kafka
-    volumes:
-      - .:/app
     command: >
-      sh -c "alembic upgrade heads && uvicorn src.main:app --reload --host 0.0.0.0 --port ${FASTAPI_PORT}"
+      sh -c "alembic upgrade heads && uvicorn src.main:app --host 0.0.0.0 --port ${FASTAPI_PORT}"
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:${FASTAPI_PORT}/api/v1/health || exit 1" ]
       interval: 30s
@@ -22,15 +21,13 @@ services:
       start_period: 10s
 
   faststream:
-    build: .
+    image: cafe_api_image
     container_name: cafe_faststream
     restart: always
     env_file:
       - .env
     depends_on:
-      - kafka
-    volumes:
-      - .:/app
+      - app
     command: >
       sh -c "faststream run src.main:faststream"
     healthcheck:
