@@ -26,6 +26,15 @@ class Settings(BaseSettings):
     kafka_host: str
     kafka_port: int
     kafka_controller_port: int
+    kafka_ui_port: int
+    kafka_ui_username: str
+    kafka_ui_password: str
+
+    prometheus_port: int
+
+    grafana_port: int
+    grafana_admin_user: str
+    grafana_admin_password: str
 
     aws_access_key_id: str
     aws_secret_access_key: str

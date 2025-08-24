@@ -137,6 +137,20 @@ The application uses the following environment variables (check `.env.example`):
 ### Kafka
 - `KAFKA_HOST` - Kafka broker host (e.g., `localhost`)
 - `KAFKA_PORT` - Kafka broker port (e.g., `9092`)
+- `KAFKA_CONTROLLER_PORT` - Kafka controller port (e.g., `9093`)
+
+### Kafka UI
+- `KAFKA_UI_PORT` - Kafka UI port (e.g., `8080`)
+- `KAFKA_UI_USERNAME` - Kafka UI username (e.g., `user1`)
+- `KAFKA_UI_PASSWORD` - Kafka UI user password (e.g., `password1`)
+
+### PROMETHEUS
+- `PROMETHEUS_PORT` - Prometheus port (e.g., `9090`)
+
+### GRAFANA
+- `GRAFANA_PORT` - Grafana port (e.g., `3000`)
+- `GRAFANA_ADMIN_USER` - Grafana admin username (e.g., `admin`)
+- `GRAFANA_ADMIN_PASSWORD` - Grafana admin password (e.g., `admin`)
 
 ### AWS S3
 - `AWS_ACCESS_KEY_ID` - AWS access key ID
