@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+import psutil
 from fastapi import FastAPI
 from faststream import FastStream
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,6 +18,8 @@ from src.exceptions.handlers.meal import register_meals_exception_handlers
 from src.exceptions.handlers.user import register_users_exception_handlers
 from src.message_broker.subscriber import cart, user
 from src.message_broker.config import kafka_broker
+from prometheus_fastapi_instrumentator import Instrumentator
+from src.metrics import CPU_USAGE, MEMORY_USAGE
 
 settings = get_settings()
 setup_logging()
@@ -50,9 +53,9 @@ faststream = FastStream(kafka_broker)
 logger.info("Configuring FastAPI application...")
 
 app.include_router(api_v1_router, prefix="/api")
-logger.info("API v1 router included")
+logger.info("API v1 router was included")
 app.include_router(admin_router)
-logger.info("Admin router included")
+logger.info("Admin router was included")
 
 app.add_middleware(
     CORSMiddleware,
@@ -62,14 +65,28 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"]
 )
-logger.info("CORS middleware configured")
+logger.info("CORS middleware was configured")
 
 site.mount_app(app)
-logger.info("Admin site mounted")
+logger.info("Admin site was mounted")
 
 register_cart_items_exception_handlers(app)
 register_users_exception_handlers(app)
 register_meals_exception_handlers(app)
 
-logger.info("Exception handlers registered")
-logger.info("CafeAPI application configured successfully")
+logger.info("Exception handlers were registered")
+logger.info("CafeAPI application was configured successfully")
+
+
+def update_system_metrics(info):
+    try:
+        CPU_USAGE.set(psutil.cpu_percent())
+        MEMORY_USAGE.set(psutil.Process().memory_info().rss)
+    except Exception as e:
+        logger.warning(f"Failed to update system metrics: {e}")
+
+
+instrumentator = Instrumentator()
+instrumentator.add(update_system_metrics)
+instrumentator.instrument(app).expose(app)
+logger.info("Prometheus FastAPI Instrumentator was configured successfully")
