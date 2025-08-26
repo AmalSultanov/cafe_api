@@ -1,30 +1,31 @@
-import src.admin
+from sqladmin import Admin
 
-from fastapi_amis_admin.admin.settings import Settings
-from fastapi_amis_admin.admin.site import AdminSite
-
-from src.core.config import get_settings
+from src.admin.model_admins.cart import CartModelAdmin
+from src.admin.model_admins.cart_item import CartItemModelAdmin
+from src.admin.model_admins.meal_category import MealCategoryModelAdmin
+from src.admin.model_admins.order import OrderModelAdmin
+from src.admin.model_admins.order_item import OrderItemModelAdmin
+from src.admin.model_admins.user import UserModelAdmin, UserIdentityModelAdmin
+from src.admin.services import authentication_backend
+from src.core.database import async_engine
 from src.core.logging import logger
 
-settings = get_settings()
+logger.info("Preparing SQLAdmin factory...")
 
-logger.info("Initializing Admin Dashboard...")
-logger.info(
-    f"Admin Dashboard URL: {settings.fastapi_host}:{settings.fastapi_port}/admin"
-)
 
-try:
-    site = AdminSite(settings=Settings(
-        host=settings.fastapi_host,
-        port=settings.fastapi_port,
-        debug=settings.fastapi_debug,
-        version=settings.fastapi_version,
-        site_title="Cafe API Admin Dashboard",
-        database_url_async=settings.postgres_url,
-        language="en_US",
-        amis_theme="dark"
-    ))
-    logger.info("Admin Dashboard initialized successfully with dark theme")
-except Exception as e:
-    logger.error(f"Failed to initialize Admin Dashboard: {e}")
-    raise
+def setup_admin(app):
+    admin = Admin(
+        app,
+        async_engine,
+        authentication_backend=authentication_backend
+    )
+
+    admin.add_view(CartModelAdmin)
+    admin.add_view(CartItemModelAdmin)
+    admin.add_view(MealCategoryModelAdmin)
+    admin.add_view(OrderModelAdmin)
+    admin.add_view(OrderItemModelAdmin)
+    admin.add_view(UserModelAdmin)
+    admin.add_view(UserIdentityModelAdmin)
+
+    return admin
