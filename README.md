@@ -76,6 +76,9 @@ The system uses PostgreSQL with the following main entities and relationships:
 - **FastStream (Apache Kafka)**
 - **FastAPI-Amis-Admin**
 - **AWS S3**
+- **Kafka UI**
+- **Prometheus**
+- **Grafana**
 - **Docker**
 
 ---
@@ -144,10 +147,10 @@ The application uses the following environment variables (check `.env.example`):
 - `KAFKA_UI_USERNAME` - Kafka UI username (e.g., `user1`)
 - `KAFKA_UI_PASSWORD` - Kafka UI user password (e.g., `password1`)
 
-### PROMETHEUS
+### Prometheus
 - `PROMETHEUS_PORT` - Prometheus port (e.g., `9090`)
 
-### GRAFANA
+### Grafana
 - `GRAFANA_PORT` - Grafana port (e.g., `3000`)
 - `GRAFANA_ADMIN_USER` - Grafana admin username (e.g., `admin`)
 - `GRAFANA_ADMIN_PASSWORD` - Grafana admin password (e.g., `admin`)
