@@ -2,10 +2,11 @@ from contextlib import asynccontextmanager
 
 import psutil
 from fastapi import FastAPI
-from faststream import FastStream
 from fastapi.middleware.cors import CORSMiddleware
+from faststream import FastStream
+from prometheus_fastapi_instrumentator import Instrumentator
 
-from src.admin.cusotm_controllers.admin import admin_router
+from src.admin.custom_controllers.admin import admin_router
 from src.admin.site import site
 from src.controllers.v1 import api_v1_router
 from src.core.config import get_settings
@@ -16,9 +17,8 @@ from src.exceptions.handlers.cart_item import (
 )
 from src.exceptions.handlers.meal import register_meals_exception_handlers
 from src.exceptions.handlers.user import register_users_exception_handlers
-from src.message_broker.subscriber import cart, user
 from src.message_broker.config import kafka_broker
-from prometheus_fastapi_instrumentator import Instrumentator
+from src.message_broker.subscriber import cart, user
 from src.metrics import CPU_USAGE, MEMORY_USAGE
 
 settings = get_settings()
@@ -38,6 +38,7 @@ async def lifespan(app: FastAPI):
     logger.info("Stopping Kafka broker...")
     await kafka_broker.stop()
     logger.info("Kafka broker stopped successfully")
+
 
 app = FastAPI(
     title="CafeAPI",
