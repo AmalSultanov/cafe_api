@@ -85,6 +85,8 @@ The system uses PostgreSQL with the following main entities and relationships:
 - **AWS S3**
 - **Kafka UI**
 - **Prometheus**
+- **Promtail**
+- **Loki**
 - **Grafana**
 - **Docker**
 
