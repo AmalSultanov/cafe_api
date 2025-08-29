@@ -30,7 +30,7 @@ async def upload_meal_image(file: UploadFile = File(...)):
 async def import_meals(file: UploadFile = File(...)):
     df = await get_df_from_file(file)
 
-    if not df:
+    if df is None or df.empty:
         return JSONResponse({
             "status": 0,
             "msg": "success",
