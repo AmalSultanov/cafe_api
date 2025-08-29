@@ -25,6 +25,9 @@ The project follows a clean architecture pattern with clear separation of concer
 ```
 cafe_api/
 │
+├── alembic/
+├── grafana/
+├── nginx/
 ├── src/
 │   ├── admin/            # Admin dashboard config, models and custom endpoints for meals bulk insertion
 │   ├── controllers/      # Versioned API route handlers
@@ -41,9 +44,13 @@ cafe_api/
 ├── tests/
 ├── .env.example
 ├── .gitignore
+├── alembic.ini
 ├── docker-compose.yml
 ├── Dockerfile
+├── loki-config.yml
 ├── poetry.lock
+├── prometheus-config.yml
+├── promtail-config.yml
 ├── pyproject.toml
 └── README.md
 ```
