@@ -9,21 +9,31 @@ from src.models.meal import MealModel
 
 @site.register_admin
 class MealModelAdmin(admin.ModelAdmin):
+    list_display = [
+        "id", "image_url", "name", "category_id", "unit_price", "created_at"
+    ]
+    list_filter = [
+        "id", "image_url", "category_id", "unit_price", "created_at"
+    ]
+    list_per_page = 50
+    search_fields = ["image_url", "name", "category_id"]
     page_schema = "MealModel"
     model = MealModel
+    display_item_action_as_column = True
 
     async def get_create_form(self, request, bulk: bool = False, **kwargs):
         form = await super().get_create_form(request, bulk=bulk, **kwargs)
         form.body = [
-            InputImage(
-                name="image_url",
-                label="meal_image",
-                receiver="post:/admin/upload-meal-image",
-                accept="image/*",
-                maxSize=5 * 1024 * 1024,
-                required=True
-            )
-        ] + form.body
+                InputImage(
+                    name="image_url",
+                    label="meal_image",
+                    receiver="post:/admin/upload-meal-image",
+                    accept="image/*",
+                    maxSize=5 * 1024 * 1024,
+                    required=True
+                )
+            ] + form.body
+
         return form
 
     async def get_update_form(self, request, **kwargs):
@@ -54,7 +64,7 @@ class MealModelAdmin(admin.ModelAdmin):
     async def get_list_table(self, request):
         table = await super().get_list_table(request)
         import_button = Action(
-            label="Import Meals",
+            label="+ Import Meals",
             level="primary",
             actionType="dialog",
             dialog=Dialog(
