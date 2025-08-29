@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     fastapi_debug: bool
     fastapi_version: str
 
+    enable_metrics: bool
+
     cors_origins: str
 
     postgres_db: str
@@ -31,6 +33,10 @@ class Settings(BaseSettings):
     kafka_ui_password: str
 
     prometheus_port: int
+
+    promtail_port: int
+
+    loki_port: int
 
     grafana_port: int
     grafana_admin_user: str

@@ -123,6 +123,12 @@ The application uses the following environment variables (check `.env.example`):
 - `FASTAPI_DEBUG` - Enable debug mode (`True` or `False`)
 - `FASTAPI_VERSION` - Application version (e.g., `1.0.0`)
 
+### Prometheus FastAPI Instrumentator
+- `ENABLE_METRICS` - Enabling metrics (e.g., `True`)
+
+### CORS
+- `CORS_ORIGINS` - CORS origins allowed (e.g., `http://localhost,http://127.0.0.1`)
+
 ### PostgreSQL
 - `POSTGRES_DB` - PostgreSQL database name (e.g., `cafe_db`)
 - `POSTGRES_USER` - PostgreSQL username (e.g., `postgres`)
@@ -149,6 +155,12 @@ The application uses the following environment variables (check `.env.example`):
 
 ### Prometheus
 - `PROMETHEUS_PORT` - Prometheus port (e.g., `9090`)
+
+### Promtail
+- `PROMTAIL_PORT` - Promtail port (e.g., `9080`)
+
+### Loki
+- `LOKI_PORT` - Loki port (e.g., `3100`)
 
 ### Grafana
 - `GRAFANA_PORT` - Grafana port (e.g., `3000`)
