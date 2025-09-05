@@ -34,7 +34,9 @@ cafe_api/
 │   ├── core/             # Core configurations, dependencies, and utilities
 │   ├── exceptions/       # Custom exception classes and global handlers
 │   ├── message_broker/   # Event-driven architecture components
+│   ├── middlewares/      # Custom middleware components
 │   ├── models/           # SQLAlchemy database models with relationships
+│   ├── monitoring/       # Prometheus FastAPI Instrumentator config, metrics
 │   ├── repositories/     # Data access layer with interface abstractions
 │   ├── schemas/          # Pydantic models for request/response validation
 │   ├── services/         # Business logic layer with service interfaces
