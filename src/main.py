@@ -10,6 +10,7 @@ from src.core.exceptions_setup import setup_exception_handlers
 from src.core.logging import setup_logging, logger
 from src.core.lifespan import lifespan
 from src.message_broker.config import kafka_broker
+from src.message_broker.subscriber import cart, user
 from src.middlewares.cors import setup_cors
 from src.middlewares.profiler import setup_profiler
 from src.monitoring.prometheus import setup_instrumentator
