@@ -4,7 +4,7 @@ from src.exceptions.cart import CartNotFoundError
 from src.message_broker.config import kafka_broker
 from src.message_broker.events.cart import CartUpdatedEvent
 from src.message_broker.topics import TOPIC_CART_UPDATED
-from src.repositories.cart.repository import CartRepository
+from src.repositories.sqlalchemy.cart import SQLAlchemyCartRepository
 from src.services.cart.service import CartService
 
 
@@ -18,7 +18,7 @@ async def update_cart_on_cart_updated(event: CartUpdatedEvent):
 
     async with async_session() as session:
         try:
-            repo = CartRepository(session)
+            repo = SQLAlchemyCartRepository(session)
             cart_service = CartService(repo)
 
             logger.info(f"Cart subscriber: Updating cart for user {user_id}")

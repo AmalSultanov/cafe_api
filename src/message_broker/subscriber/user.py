@@ -6,7 +6,7 @@ from src.message_broker.events.user import UserCreatedEvent
 from src.message_broker.topics import (
     TOPIC_USER_CREATED
 )
-from src.repositories.cart.repository import CartRepository
+from src.repositories.sqlalchemy.cart import SQLAlchemyCartRepository
 from src.services.cart.service import CartService
 
 
@@ -22,7 +22,7 @@ async def create_cart_on_user_created(event: UserCreatedEvent):
             logger.debug(
                 f"User subscriber: Initializing cart repo and service for user {user_id}"
             )
-            repo = CartRepository(session)
+            repo = SQLAlchemyCartRepository(session)
             cart_service = CartService(repo)
 
             logger.info(f"User subscriber: Creating cart for user {user_id}")
