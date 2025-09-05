@@ -1,6 +1,6 @@
 from src.core.logging import logger
 from src.exceptions.cart import CartAlreadyExistsError, CartNotFoundError
-from src.repositories.cart.interface import ICartRepository
+from src.repositories.interfaces.cart import ICartRepository
 from src.schemas.cart import CartRead, CartPatchUpdate
 
 

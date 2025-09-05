@@ -4,7 +4,7 @@ from src.core.logging import logger
 from src.exceptions.user import (
     UserIdentityNotFoundError, UserIdentityAlreadyExistsError
 )
-from src.repositories.user.identity_interface import IUserIdentityRepository
+from src.repositories.interfaces.user_identity import IUserIdentityRepository
 from src.schemas.user import IdentityCheck, IdentityRead, IdentityCreate
 
 

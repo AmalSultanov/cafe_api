@@ -4,10 +4,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.database import get_session
 from src.core.dependencies.message_broker import get_event_publisher
 from src.message_broker.publisher.interface import IEventPublisher
-from src.repositories.user.identity_interface import IUserIdentityRepository
-from src.repositories.user.identity_repository import UserIdentityRepository
-from src.repositories.user.interface import IUserRepository
-from src.repositories.user.repository import UserRepository
+from src.repositories.interfaces.user_identity import IUserIdentityRepository
+from src.repositories.sqlalchemy.user_identity import (
+    SQLAlchemyUserIdentityRepository
+)
+from src.repositories.interfaces.user import IUserRepository
+from src.repositories.sqlalchemy.user import SQLAlchemyUserRepository
 from src.services.user.identity.interface import IUserIdentityService
 from src.services.user.identity.service import UserIdentityService
 from src.services.user.interface import IUserService
@@ -17,7 +19,7 @@ from src.services.user.service import UserService
 def get_user_identity_repo(
     db: AsyncSession = Depends(get_session)
 ) -> IUserIdentityRepository:
-    return UserIdentityRepository(db)
+    return SQLAlchemyUserIdentityRepository(db)
 
 
 def get_user_identity_service(
@@ -31,7 +33,7 @@ def get_user_identity_service(
 def get_user_repo(
     db: AsyncSession = Depends(get_session)
 ) -> IUserRepository:
-    return UserRepository(db)
+    return SQLAlchemyUserRepository(db)
 
 
 def get_user_service(

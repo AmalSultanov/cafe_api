@@ -1,6 +1,6 @@
 from src.core.logging import logger
 from src.models.order_item import OrderItemModel
-from src.repositories.order_item.interface import IOrderItemRepository
+from src.repositories.interfaces.order_item import IOrderItemRepository
 
 
 class OrderItemService:

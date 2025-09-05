@@ -3,7 +3,7 @@ from src.core.utils.datetime import strip_timezone
 from src.exceptions.cart import CartNotFoundError
 from src.exceptions.cart_item import CartItemsNotFoundError
 from src.exceptions.order import OrdersNotFound, OrderNotFound
-from src.repositories.order.interface import IOrderRepository
+from src.repositories.interfaces.order import IOrderRepository
 from src.schemas.order import OrderRead, OrderCreate
 from src.services.cart.interface import ICartService
 from src.services.cart_item.interface import ICartItemService

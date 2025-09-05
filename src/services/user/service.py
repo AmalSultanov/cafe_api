@@ -8,7 +8,7 @@ from src.exceptions.user import (
 from src.message_broker.events.user import UserCreatedEvent
 from src.message_broker.publisher.interface import IEventPublisher
 from src.message_broker.topics import TOPIC_USER_CREATED
-from src.repositories.user.interface import IUserRepository
+from src.repositories.interfaces.user import IUserRepository
 from src.schemas.common import PaginationParams
 from src.schemas.user import (
     UserRegister, UserPutUpdate, UserPatchUpdate, UserRead, IdentityCheck,

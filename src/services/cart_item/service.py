@@ -6,7 +6,7 @@ from src.exceptions.cart_item import (
 from src.message_broker.events.cart import CartUpdatedEvent
 from src.message_broker.publisher.interface import IEventPublisher
 from src.message_broker.topics import TOPIC_CART_UPDATED
-from src.repositories.cart_item.interface import ICartItemRepository
+from src.repositories.interfaces.cart_item import ICartItemRepository
 from src.schemas.cart import CartPatchUpdate
 from src.schemas.cart_item import (
     CartItemCreate, CartItemPatchUpdate, CartItemRead

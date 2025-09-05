@@ -5,7 +5,7 @@ from src.exceptions.meal_category import (
     MealCategoryAlreadyExistsError, MealCategoryNotFoundError,
     NoMealCategoryUpdateDataError
 )
-from src.repositories.meal_category.interface import IMealCategoryRepository
+from src.repositories.interfaces.meal_category import IMealCategoryRepository
 from src.schemas.common import PaginationParams
 from src.schemas.meal_category import (
     MealCategoryPatchUpdate, MealCategoryCreate, MealCategoryRead,
