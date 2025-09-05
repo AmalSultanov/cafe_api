@@ -25,7 +25,6 @@ The project follows a clean architecture pattern with clear separation of concer
 ```
 cafe_api/
 │
-├── alembic/
 ├── grafana/
 ├── nginx/
 ├── src/
@@ -35,6 +34,7 @@ cafe_api/
 │   ├── exceptions/       # Custom exception classes and global handlers
 │   ├── message_broker/   # Event-driven architecture components
 │   ├── middlewares/      # Custom middleware components
+│   ├── migrations/       # Alembic files
 │   ├── models/           # SQLAlchemy database models with relationships
 │   ├── monitoring/       # Prometheus FastAPI Instrumentator config, metrics
 │   ├── repositories/     # Data access layer with interface abstractions
